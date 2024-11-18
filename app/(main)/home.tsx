@@ -20,8 +20,8 @@ interface LocationCoords {
   longitude: number;
 }
 
-const TRACKING_DURATION = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
-const UPDATE_INTERVAL = 15 * 60 * 1000; // 15 minutes in milliseconds
+const TRACKING_DURATION = 2 * 60 * 60 * 1000;
+const UPDATE_INTERVAL = 15 * 60 * 1000;
 
 Dimensions.get("window");
 
