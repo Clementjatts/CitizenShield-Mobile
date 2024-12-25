@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { ThemeProvider } from '@react-navigation/native';
+import { ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Slot, Redirect } from 'expo-router';
-import { useColorScheme, Alert } from 'react-native';
+import { Alert } from 'react-native';
 import { AppLightTheme, AppDarkTheme } from '../constants/Colors';
 import { User } from 'firebase/auth';
 import { auth, db } from '../config/firebaseConfig';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
+import { ThemeProvider, useThemeContext } from '../context/ThemeContext';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -17,13 +18,13 @@ export const unstable_settings = {
 };
 
 function RootLayoutNav({ user }: { user: User | null }) {
-  const colorScheme = useColorScheme();
+  const { actualTheme } = useThemeContext();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? AppDarkTheme : AppLightTheme}>
+    <NavigationThemeProvider value={actualTheme === 'dark' ? AppDarkTheme : AppLightTheme}>
       {user ? <Redirect href="/(main)/home" /> : <Redirect href="/" />}
       <Slot />
-    </ThemeProvider>
+    </NavigationThemeProvider>
   );
 }
 
@@ -96,5 +97,9 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav user={user} />;
+  return (
+    <ThemeProvider>
+      <RootLayoutNav user={user} />
+    </ThemeProvider>
+  );
 }

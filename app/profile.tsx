@@ -4,7 +4,7 @@ import { Text } from '../components/Themed';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@react-navigation/native';
 import CustomButton from '../components/CustomButton';
-import { Appearance } from 'react-native';
+import ThemeToggle from '../components/ThemeToggle';
 import { Ionicons } from '@expo/vector-icons';
 import { auth, db } from '../config/firebaseConfig';
 import { signOut } from 'firebase/auth';
@@ -21,7 +21,6 @@ export default function ProfileScreen() {
     const { colors } = useTheme();
     const router = useRouter();
     const [pushNotifications, setPushNotifications] = useState(true);
-    const [darkMode, setDarkMode] = useState(Appearance.getColorScheme() === 'dark');
     const [userData, setUserData] = useState<UserData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -47,10 +46,6 @@ export default function ProfileScreen() {
         }
     };
 
-    useEffect(() => {
-        Appearance.setColorScheme(darkMode ? 'dark' : 'light');
-    }, [darkMode]);
-
     const handleLogout = async () => {
         try {
             router.replace('/login');
@@ -59,10 +54,6 @@ export default function ProfileScreen() {
             const errorMessage = handleFirebaseError(error);
             Alert.alert('Logout Failed', errorMessage);
         }
-    };
-
-    const toggleDarkMode = () => {
-        setDarkMode(!darkMode);
     };
 
     const goBack = () => {
@@ -79,7 +70,7 @@ export default function ProfileScreen() {
 
     return (
         <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-            <StatusBar barStyle={darkMode ? "light-content" : "dark-content"} />
+            <StatusBar barStyle="dark-content" />
             <View style={styles.header}>
                 <TouchableOpacity onPress={goBack} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={colors.text} />
@@ -130,14 +121,12 @@ export default function ProfileScreen() {
                             thumbColor={pushNotifications ? colors.card : "#f4f3f4"}
                         />
                     </View>
-                    <View style={styles.settingItem}>
-                        <Text style={[styles.settingLabel, { color: colors.text }]}>Dark Mode</Text>
-                        <Switch
-                            value={darkMode}
-                            onValueChange={toggleDarkMode}
-                            trackColor={{ false: colors.border, true: colors.primary }}
-                            thumbColor={darkMode ? colors.card : "#f4f3f4"}
-                        />
+                    <View style={[styles.settingItem, { backgroundColor: colors.card }]}>
+                        <View style={styles.settingLeft}>
+                            <Ionicons name="color-palette-outline" size={24} color={colors.text} />
+                            <Text style={[styles.settingText, { color: colors.text }]}>Theme</Text>
+                        </View>
+                        <ThemeToggle />
                     </View>
                 </View>
 
@@ -240,6 +229,14 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(0,0,0,0.1)',
+    },
+    settingLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    settingText: {
+        fontSize: 16,
+        marginLeft: 10,
     },
     settingLabel: {
         fontSize: 16,

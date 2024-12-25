@@ -7,7 +7,6 @@ import { MapType, Region } from "react-native-maps";
 import * as SMS from "expo-sms";
 import { router } from "expo-router";
 import { AppState, AppStateStatus } from "react-native";
-import SOSButton from "../../components/SOSButton";
 import ProfileHeader from "../../components/ProfileHeader";
 import CustomMapView, { CustomMapViewRef } from "../../components/MapView";
 import EmergencyTypeSelector from "../../components/EmergencyTypeSelector";
@@ -20,6 +19,16 @@ interface LocationCoords {
   longitude: number;
 }
 
+interface EmergencyData {
+  type: string;
+  location: LocationCoords;
+  timestamp: string;
+  userId: string;
+  status: string;
+}
+
+type EmergencyTypeId = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16";
+
 const TRACKING_DURATION = 2 * 60 * 60 * 1000;
 const UPDATE_INTERVAL = 15 * 60 * 1000;
 
@@ -27,14 +36,22 @@ Dimensions.get("window");
 
 const getEmergencyTypeText = (typeId: string): string => {
   const emergencyTypes = {
-    "1": "Personal Safety Threat",
-    "2": "Law Enforcement Assistance",
-    "3": "Medical Emergency",
+    "1": "Life Threat",
+    "2": "Police Abuse",
+    "3": "Medical",
     "4": "Fire",
-    "5": "Traffic Accident",
-    "6": "Natural Disaster",
-    "7": "Domestic Violence",
-    "8": "Mental Health Crisis",
+    "5": "Traffic",
+    "6": "Disaster",
+    "7": "Domestic",
+    "8": "Mental",
+    "9": "Kidnap",
+    "10": "Burglary",
+    "11": "Assault",
+    "12": "Stalking",
+    "13": "Robbery",
+    "14": "Shooting",
+    "15": "Terrorism",
+    "16": "Riot"
   };
   return (
     emergencyTypes[typeId as keyof typeof emergencyTypes] || "Unknown Emergency"
@@ -91,12 +108,11 @@ export default function HomeScreen() {
   const [currentLocation, setCurrentLocation] = useState<LocationCoords | null>(
     null
   );
-  const [selectedEmergencyType, setSelectedEmergencyType] = useState<
-    string | null
-  >(null);
+  const [selectedEmergencyType, setSelectedEmergencyType] = useState<EmergencyTypeId | null>(null);
   const mapRef = useRef<CustomMapViewRef>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const animatedButtonScale = useRef(new Animated.Value(1)).current;
+  const [isLoading, setIsLoading] = useState(false);
 
   // New state variables for location tracking
   const [isTracking, setIsTracking] = useState(false);
@@ -263,44 +279,68 @@ export default function HomeScreen() {
     }
   };
 
-  // Function to handle when the SOS button is activated
-  const handleSOSActivate = async (
-    emergencyType: string,
-    location: LocationCoords
-  ) => {
-    if (!auth.currentUser) {
-      Alert.alert("Error", "You must be logged in to use emergency features");
-      return;
-    }
-
+  const handleEmergencyTrigger = async (typeId: EmergencyTypeId) => {
     try {
-      // Send one-time SMS to emergency contacts
-      const { contactCount } = await sendEmergencySMS(emergencyType, location);
+      setIsLoading(true);
+      
+      // Get current location
+      const location = await getCurrentLocation();
+      if (!location) {
+        Alert.alert('Error', 'Unable to get your location. Please enable location services and try again.');
+        return;
+      }
 
-      // Create initial emergency record
-      const emergencyRef = await addDoc(collection(db, "emergencies"), {
-        type: getEmergencyTypeText(emergencyType),
-        initialLocation: location,
-        userId: auth.currentUser.uid,
-        timestamp: new Date(),
-        status: "active",
+      // Send SMS to emergency contacts
+      await sendEmergencySMS(typeId, location);
+
+      // Save emergency to database
+      await saveEmergencyAlert({
+        type: typeId,
+        location: location,
+        timestamp: new Date().toISOString(),
+        userId: auth.currentUser?.uid || '',
+        status: 'active'
       });
 
-      // Start location tracking
-      await startLocationTracking(emergencyRef.id);
-
+      // Show success message
       Alert.alert(
-        "Emergency Alert Activated",
-        `Emergency type: ${getEmergencyTypeText(emergencyType)}\n\n` +
-          `Alert sent to ${contactCount} emergency contact${
-            contactCount !== 1 ? "s" : ""
-          }.\n\n` +
-          "Your location will be tracked for the next 2 hours. Stay safe."
+        'Emergency Alert Sent',
+        'Your emergency contacts have been notified of your situation.',
+        [{ text: 'OK' }]
       );
+
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to activate emergency";
-      Alert.alert("Error", errorMessage);
+      console.error('Error sending emergency alert:', error);
+      Alert.alert('Error', 'Failed to send emergency alert. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getCurrentLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission to access location was denied");
+        return null;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      return {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+    } catch (error) {
+      console.error("Error getting current location:", error);
+      return null;
+    }
+  };
+
+  const saveEmergencyAlert = async (emergencyData: EmergencyData) => {
+    try {
+      await addDoc(collection(db, "emergencies"), emergencyData);
+    } catch (error) {
+      console.error("Error saving emergency alert:", error);
     }
   };
 
@@ -341,7 +381,7 @@ export default function HomeScreen() {
   };
 
   // Function to handle selecting an emergency type
-  const handleEmergencyTypeSelect = (typeId: string) => {
+  const handleEmergencyTypeSelect = (typeId: EmergencyTypeId) => {
     setSelectedEmergencyType(typeId);
   };
 
@@ -378,24 +418,37 @@ export default function HomeScreen() {
       {/* Map control buttons */}
       <View style={styles.mapControls}>
         <Pressable
-          style={[styles.mapControlButton, { backgroundColor: colors.card }]}
+          style={[
+            styles.mapControlButton,
+            { backgroundColor: "white" }
+          ]}
           onPress={resetLocation}
         >
-          <Ionicons name="locate" size={20} color={colors.text} />
+          <Ionicons name="locate" size={18} color="#007AFF" />
         </Pressable>
         <Pressable
-          style={[styles.mapControlButton, { backgroundColor: colors.card }]}
+          style={[
+            styles.mapControlButton,
+            { backgroundColor: "white" }
+          ]}
           onPress={shareLocation}
         >
-          <Ionicons name="share-social" size={20} color={colors.text} />
+          <Ionicons name="share-social" size={18} color="#007AFF" />
         </Pressable>
         <Pressable
-          style={[styles.mapControlButton, { backgroundColor: colors.card }]}
+          style={[
+            styles.mapControlButton,
+            { backgroundColor: "white" }
+          ]}
           onPress={() =>
             setMapType(mapType === "standard" ? "satellite" : "standard")
           }
         >
-          <Ionicons name="map-outline" size={20} color={colors.text} />
+          <Ionicons
+            name={mapType === "standard" ? "map" : "map-outline"}
+            size={18}
+            color="#007AFF"
+          />
         </Pressable>
       </View>
 
@@ -411,9 +464,8 @@ export default function HomeScreen() {
             style={({ pressed }) => [
               styles.button,
               {
-                backgroundColor: pressed
-                  ? colors.primary + "CC"
-                  : colors.primary,
+                opacity: pressed ? 0.8 : 1,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
               },
             ]}
             onPress={navigateToEmergencyContacts}
@@ -422,7 +474,7 @@ export default function HomeScreen() {
           >
             <View style={styles.buttonContent}>
               <View style={styles.iconBackground}>
-                <Ionicons name="person-add" size={18} color="white" />
+                <Ionicons name="person-add" size={16} color="white" />
               </View>
               <Text style={styles.buttonText}>Add Contacts</Text>
             </View>
@@ -439,9 +491,8 @@ export default function HomeScreen() {
             style={({ pressed }) => [
               styles.button,
               {
-                backgroundColor: pressed
-                  ? colors.primary + "CC"
-                  : colors.primary,
+                opacity: pressed ? 0.8 : 1,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
               },
             ]}
             onPress={navigateToPoliceDatabase}
@@ -450,7 +501,7 @@ export default function HomeScreen() {
           >
             <View style={styles.buttonContent}>
               <View style={styles.iconBackground}>
-                <Ionicons name="shield" size={18} color="white" />
+                <Ionicons name="shield" size={16} color="white" />
               </View>
               <Text style={styles.buttonText}>Police Contact</Text>
             </View>
@@ -458,26 +509,12 @@ export default function HomeScreen() {
         </Animated.View>
       </View>
 
-      {/* SOS button and Emergency Type Selector */}
+      {/* Emergency Type Selector */}
       <View style={styles.overlayContainer}>
-        <View style={styles.sosContainer}>
-          <SOSButton
-            style={styles.sosButton}
-            onActivate={handleSOSActivate}
-            selectedEmergencyType={selectedEmergencyType}
-          />
-          <Animated.View
-            style={[styles.instructionContainer, { opacity: fadeAnim }]}
-          >
-            <Text style={styles.instructionText}>
-              Select an emergency type and double tap the button to alert your
-              emergency contacts
-            </Text>
-          </Animated.View>
-        </View>
         <EmergencyTypeSelector
-          onSelect={handleEmergencyTypeSelect}
           selectedType={selectedEmergencyType}
+          onSelect={setSelectedEmergencyType}
+          onEmergencyTrigger={handleEmergencyTrigger}
         />
       </View>
     </View>
@@ -499,17 +536,14 @@ const styles = StyleSheet.create({
   },
   mapControls: {
     position: "absolute",
-    right: 20,
-    top: "60%",
-    transform: [{ translateY: -70 }],
-  },
-  mapControlButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
+    right: 16,
+    top: Platform.OS === 'ios' ? 240 : 220, // Position below the contact buttons
+    backgroundColor: "rgba(255, 255, 255, 0.98)",
+    borderRadius: 12,
+    padding: 8,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.1)",
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -521,96 +555,71 @@ const styles = StyleSheet.create({
         elevation: 3,
       },
     }),
+  },
+  mapControlButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(0, 0, 0, 0.1)",
   },
   buttonContainer: {
     position: "absolute",
-    top: 180,
-    left: 20,
-    right: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    left: 16, // Changed from right to left
+    top: Platform.OS === 'ios' ? 180 : 160,
+    zIndex: 2000,
+    flexDirection: "column",
+    gap: 8,
+    backgroundColor: 'transparent',
   },
   buttonWrapper: {
-    flex: 1,
-    marginHorizontal: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   button: {
-    borderRadius: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.98)",
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    width: 140,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
-    overflow: "hidden",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
+    borderColor: "rgba(0, 0, 0, 0.1)",
   },
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    justifyContent: "flex-start",
+    gap: 8,
   },
   iconBackground: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 16,
-    width: 32,
-    height: 32,
+    backgroundColor: "#007AFF",
+    borderRadius: 8,
+    width: 28,
+    height: 28,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 8,
   },
   buttonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.1)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  overlayContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-  },
-  sosContainer: {
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  sosButton: {
-    marginBottom: 10,
-  },
-  instructionContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 16,
-    backgroundColor: "rgba(255, 107, 107, 0.9)",
-    maxWidth: "90%",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 5,
-      },
-    }),
-  },
-  instructionText: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#FFFFFF",
-    textAlign: "center",
-    lineHeight: 18,
+    color: "#333",
+  },
+  overlayContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });

@@ -45,11 +45,13 @@ export default function LaunchScreen() {
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             {/* Animated logo container */}
             <Animated.View style={[styles.logoContainer, { opacity: fadeAnim }]}>
-                <Image
-                    source={require('../assets/images/logo.png')}
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
+                <View style={styles.logoCircle}>
+                    <Image
+                        source={require('../assets/images/logo.png')}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                </View>
             </Animated.View>
             <View style={styles.bottomContainer}>
                 {/* Animated description container */}
@@ -104,9 +106,28 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    logo: {
+    logoCircle: {
         width: width * 0.6,
         height: width * 0.6,
+        borderRadius: width * 0.3,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        padding: 20,
+    },
+    logo: {
+        width: '70%',
+        height: '70%',
+        maxWidth: '70%',
+        maxHeight: '70%',
     },
     bottomContainer: {
         width: '100%',

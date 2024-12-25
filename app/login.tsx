@@ -65,11 +65,13 @@ export default function LoginScreen() {
                     keyboardShouldPersistTaps="handled"
                 >
                     <View style={styles.logoContainer}>
-                        <Image
-                            source={require('../assets/images/logo.png')}
-                            style={styles.logo}
-                            resizeMode="contain"
-                        />
+                        <View style={styles.logoCircle}>
+                            <Image
+                                source={require('../assets/images/logo.png')}
+                                style={styles.logo}
+                                resizeMode="contain"
+                            />
+                        </View>
                     </View>
                     <Text style={[styles.title, { color: colors.text }]}>Welcome Back</Text>
                     <View style={[styles.inputContainer, { backgroundColor: colors.card }]}>
@@ -140,12 +142,32 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     logoContainer: {
+        width: '100%',
         alignItems: 'center',
-        marginBottom: 40,
+        marginBottom: 20,
+    },
+    logoCircle: {
+        width: width * 0.5,
+        height: width * 0.5,
+        borderRadius: width * 0.25,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        padding: 20,
     },
     logo: {
-        width: width * 0.4,
-        height: width * 0.4,
+        width: '70%',
+        height: '70%',
+        maxWidth: '70%',
+        maxHeight: '70%',
     },
     title: {
         fontSize: 28,
