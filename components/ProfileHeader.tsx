@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, SafeAreaView, Animated, Image } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,12 +6,18 @@ import { useRouter } from 'expo-router';
 import { auth, db } from '../config/firebaseConfig';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
+import { CommonStyles } from '../constants/Styles';
+import { useScaleAnimation } from '../hooks/useScaleAnimation';
+
+const GRADIENT_COLORS = {
+    header: ['rgba(255,255,255,0.9)', 'rgba(255,255,255,1)'] as const,
+    avatar: (primary: string) => [`${primary}20`, `${primary}10`] as const,
+};
 
 const ProfileHeader: React.FC = () => {
     const { colors } = useTheme();
     const router = useRouter();
-    const avatarScale = useRef(new Animated.Value(1)).current;
+    const { scale, handlePressIn, handlePressOut } = useScaleAnimation();
     const [userData, setUserData] = useState({
         name: '',
         avatar: null,
@@ -39,25 +45,11 @@ const ProfileHeader: React.FC = () => {
     const navigateToProfile = () => router.push('/profile');
     const navigateToNotifications = () => router.push('/notifications');
 
-    const handlePressIn = () => {
-        Animated.spring(avatarScale, {
-            toValue: 0.95,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    const handlePressOut = () => {
-        Animated.spring(avatarScale, {
-            toValue: 1,
-            useNativeDriver: true,
-        }).start();
-    };
-
     return (
         <View style={[styles.container, { backgroundColor: '#FFFFFF' }]}>
             <SafeAreaView style={styles.safeArea}>
                 <LinearGradient
-                    colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,1)']}
+                    colors={GRADIENT_COLORS.header}
                     style={styles.gradient}
                 >
                     <View style={styles.contentWrapper}>
@@ -70,16 +62,15 @@ const ProfileHeader: React.FC = () => {
                                 accessibilityLabel={`${userData.name}'s profile`}
                                 accessibilityHint="Double tap to view your profile"
                             >
-                                <Animated.View style={[styles.avatarContainer, { transform: [{ scale: avatarScale }] }]}>
+                                <Animated.View style={[styles.avatarContainer, { transform: [{ scale }] }]}>
                                     <LinearGradient
-                                        colors={[colors.primary + '20', colors.primary + '10']}
+                                        colors={GRADIENT_COLORS.avatar(colors.primary)}
                                         style={styles.avatarGradient}
                                     >
-                                        {userData.avatar ? (
-                                            <Image source={{ uri: userData.avatar }} style={styles.avatar} />
-                                        ) : (
-                                            <Image source={require('../assets/images/avatar.png')} style={styles.avatar} />
-                                        )}
+                                        <Image 
+                                            source={userData.avatar ? { uri: userData.avatar } : require('../assets/images/avatar.png')} 
+                                            style={styles.avatar}
+                                        />
                                     </LinearGradient>
                                 </Animated.View>
                                 <View style={styles.textContainer}>
@@ -92,20 +83,22 @@ const ProfileHeader: React.FC = () => {
                                     onPress={navigateToNotifications}
                                     style={styles.notificationButton}
                                 >
-                                    <BlurView intensity={80} tint="light" style={styles.notificationBlur}>
-                                        <Ionicons name="notifications-outline" size={22} color={colors.text} />
-                                        <View style={[styles.notificationBadge, { backgroundColor: colors.primary }]} />
-                                    </BlurView>
+                                    <Ionicons name="notifications-outline" size={22} color={colors.text} />
                                 </TouchableOpacity>
                             </View>
                         </View>
                         <View style={styles.bottomSection}>
-                            <TouchableOpacity style={[styles.locationContainer, { backgroundColor: colors.primary + '08' }]}>
+                            <TouchableOpacity 
+                                style={[
+                                    styles.locationContainer, 
+                                    { backgroundColor: colors.primary + '08' },
+                                    CommonStyles.roundedCorners
+                                ]}
+                            >
                                 <Ionicons name="location-outline" size={16} color={colors.primary} style={styles.locationIcon} />
                                 <Text style={[styles.locationText, { color: colors.text }]} numberOfLines={1}>
                                     {userData.location}
                                 </Text>
-                                <View style={styles.locationDot} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -136,14 +129,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     topSection: {
-        flexDirection: 'row',
+        ...CommonStyles.row,
         justifyContent: 'space-between',
-        alignItems: 'center',
         marginBottom: 16,
     },
     profileSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        ...CommonStyles.row,
         flex: 1,
     },
     avatarContainer: {
@@ -174,39 +165,18 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
     },
     rightSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        ...CommonStyles.row,
     },
     notificationButton: {
         marginLeft: 8,
     },
-    notificationBlur: {
-        padding: 10,
-        borderRadius: 15,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.3)',
-    },
-    notificationBadge: {
-        position: 'absolute',
-        top: 8,
-        right: 8,
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        borderWidth: 1.5,
-        borderColor: '#FFFFFF',
-    },
     bottomSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        ...CommonStyles.row,
     },
     locationContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        ...CommonStyles.row,
         paddingHorizontal: 12,
         paddingVertical: 8,
-        borderRadius: 12,
         maxWidth: '80%',
     },
     locationIcon: {
@@ -216,13 +186,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
         fontWeight: '500',
         flex: 1,
-    },
-    locationDot: {
-        width: 4,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: '#00000020',
-        marginLeft: 8,
     },
 });
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { StyleSheet, View, TextInput, FlatList, TouchableOpacity, Alert, ActivityIndicator, Image, StatusBar } from 'react-native';
 import { Text } from '../components/Themed';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,6 +19,7 @@ const NewMessage: React.FC<NewMessageProps> = ({ onClose }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
+    const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
     const searchUsers = useCallback(async (searchText: string) => {
         if (!searchText.trim() || searchText.length < 2) {
@@ -164,7 +165,12 @@ const NewMessage: React.FC<NewMessageProps> = ({ onClose }) => {
                     value={searchQuery}
                     onChangeText={(text) => {
                         setSearchQuery(text);
-                        searchUsers(text);
+                        if (searchTimeoutRef.current) {
+                            clearTimeout(searchTimeoutRef.current);
+                        }
+                        searchTimeoutRef.current = setTimeout(() => {
+                            searchUsers(text);
+                        }, 300);
                     }}
                     autoCapitalize="none"
                 />

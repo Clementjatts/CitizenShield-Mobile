@@ -5,6 +5,7 @@ import { Link } from 'expo-router';
 import { Article } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@react-navigation/native';
+import { CommonStyles } from '../constants/Styles';
 
 interface BlogArticlePreviewProps {
     article: Article;
@@ -58,14 +59,10 @@ export default function BlogArticlePreview({ article }: BlogArticlePreviewProps)
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        borderRadius: 12,
         padding: 12,
         marginBottom: 12,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        ...CommonStyles.roundedCorners,
+        ...CommonStyles.shadow,
     },
     image: {
         width: 100,

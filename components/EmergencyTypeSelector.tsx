@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Platform, ScrollView } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
@@ -56,11 +56,6 @@ const emergencyTypeColors: Record<EmergencyTypeId, string> = {
     '16': '#8E44AD', // Riot - Deep Purple
 };
 
-const { width } = Dimensions.get('window');
-const ITEMS_PER_ROW = 4;
-const ITEM_MARGIN = 8;
-const ITEM_WIDTH = (width - (ITEMS_PER_ROW + 1) * ITEM_MARGIN) / ITEMS_PER_ROW;
-
 const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
     selectedType,
     onSelect,
@@ -89,8 +84,8 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
 
     const renderGridItems = () => {
         const rows = [];
-        for (let i = 0; i < EMERGENCY_TYPES.length; i += ITEMS_PER_ROW) {
-            const rowItems = EMERGENCY_TYPES.slice(i, i + ITEMS_PER_ROW);
+        for (let i = 0; i < EMERGENCY_TYPES.length; i += 4) {
+            const rowItems = EMERGENCY_TYPES.slice(i, i + 4);
             const row = (
                 <View key={i} style={styles.gridContainer}>
                     {rowItems.map((type) => (
@@ -143,25 +138,25 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        bottom: Platform.OS === 'ios' ? 30 : 20, // Lowered further to be closer to navigation
+        bottom: Platform.OS === 'ios' ? 20 : 10, // Reduced bottom margin
         left: 0,
         right: 0,
-        paddingHorizontal: 16,
+        paddingHorizontal: 12, // Reduced horizontal padding
     },
     scrollViewContent: {
-        paddingVertical: 8,
+        paddingVertical: 4, // Reduced vertical padding
     },
     gridContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-        gap: 8,
+        gap: 6, // Reduced gap
     },
     card: {
-        width: '23%',
-        aspectRatio: 1,
-        borderRadius: 16,
-        padding: 8,
+        width: '22%', // Slightly reduced width
+        aspectRatio: 0.9, // Slightly reduced height while maintaining reasonable proportions
+        borderRadius: 12, // Slightly reduced border radius
+        padding: 6, // Reduced padding
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: "#000",
@@ -183,7 +178,7 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     cardText: {
-        fontSize: 11,
+        fontSize: 10, // Reduced font size
         fontWeight: '600',
         textAlign: 'center',
         color: '#FFFFFF',

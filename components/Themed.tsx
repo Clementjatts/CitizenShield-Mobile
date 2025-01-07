@@ -1,6 +1,6 @@
-import { Text as DefaultText, View as DefaultView } from 'react-native';
+import { Text as DefaultText, View as DefaultView, useColorScheme } from 'react-native';
 import Colors from '../constants/Colors';
-import { useColorScheme } from './useColorScheme';
+import { Fonts } from '../constants/Fonts';
 
 type ThemeProps = {
   lightColor?: string;
@@ -28,7 +28,7 @@ export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
-  return <DefaultText style={[{ color, fontFamily: 'Roboto' }, style]} {...otherProps} />;
+  return <DefaultText style={[{ color, fontFamily: Fonts.default }, style]} {...otherProps} />;
 }
 
 export function View(props: ViewProps) {

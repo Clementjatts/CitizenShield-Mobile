@@ -1,25 +1,30 @@
-import { Link } from 'expo-router';
+import { Link, ExternalPathString } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, GestureResponderEvent } from 'react-native';
 
-export function ExternalLink(
-  props: Omit<React.ComponentProps<typeof Link>, 'href'> & { href: string }
-) {
+type ExternalLinkProps = {
+  href: ExternalPathString;
+} & Omit<React.ComponentProps<typeof Link>, 'href'>;
+
+export function ExternalLink({ href, ...props }: ExternalLinkProps) {
+  const handlePress = React.useCallback(async (e: React.MouseEvent | GestureResponderEvent) => {
+    if (Platform.OS !== 'web') {
+      e.preventDefault();
+      try {
+        await WebBrowser.openBrowserAsync(href);
+      } catch (error) {
+        console.error('Failed to open external link:', error);
+      }
+    }
+  }, [href]);
+
   return (
     <Link
       target="_blank"
       {...props}
-      // @ts-expect-error: External URLs are not typed.
-      href={props.href}
-      onPress={(e) => {
-        if (Platform.OS !== 'web') {
-          // Prevent the default behavior of linking to the default browser on native.
-          e.preventDefault();
-          // Open the link in an in-app browser.
-          WebBrowser.openBrowserAsync(props.href as string);
-        }
-      }}
+      href={href}
+      onPress={handlePress}
     />
   );
 }

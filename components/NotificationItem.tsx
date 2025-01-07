@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Modal, ScrollView, SafeAreaView, Platform } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { CommonStyles } from '../constants/Styles';
 
 interface NotificationItemProps {
     title: string;
@@ -18,6 +19,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 }) => {
     const { colors } = useTheme();
     const [showFullMessage, setShowFullMessage] = useState(false);
+    const formattedTimestamp = useMemo(() => new Date(timestamp).toLocaleString(), [timestamp]);
 
     const toggleFullMessage = () => {
         setShowFullMessage(!showFullMessage);
@@ -47,7 +49,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                         {message}
                     </Text>
                     <Text style={[styles.timestamp, { color: colors.text }]}>
-                        {new Date(timestamp).toLocaleString()}
+                        {formattedTimestamp}
                     </Text>
                 </View>
                 <Ionicons
@@ -94,7 +96,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                                     {message}
                                 </Text>
                                 <Text style={[styles.modalTimestamp, { color: colors.text }]}>
-                                    {new Date(timestamp).toLocaleString()}
+                                    {formattedTimestamp}
                                 </Text>
                             </View>
                         </ScrollView>
@@ -117,12 +119,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         padding: 16,
         marginBottom: 8,
-        borderRadius: 12,
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
+        ...CommonStyles.roundedCorners,
+        ...CommonStyles.shadow,
     },
     iconContainer: {
         marginRight: 12,

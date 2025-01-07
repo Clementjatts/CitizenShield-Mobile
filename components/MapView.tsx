@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
+import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { StyleSheet, View, Platform, Animated, Dimensions } from 'react-native';
 import MapView, { PROVIDER_GOOGLE, Marker, MapType, Region, Callout } from 'react-native-maps';
 import { useTheme } from '@react-navigation/native';
 import { BlurView } from 'expo-blur';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { darkMapStyle } from '../constants/mapStyles';
 
 interface CustomMapViewProps {
     style?: object;
@@ -19,7 +20,6 @@ const CustomMapView = forwardRef<CustomMapViewRef, CustomMapViewProps>(({ style,
     const { colors } = useTheme();
     const markerScale = useRef(new Animated.Value(1)).current;
     const mapRef = useRef<MapView>(null);
-    const [region, setRegion] = useState<Region | null>(null);
 
     useImperativeHandle(ref, () => ({
         animateToRegion: (region: Region, duration: number) => {
@@ -46,92 +46,6 @@ const CustomMapView = forwardRef<CustomMapViewRef, CustomMapViewProps>(({ style,
         pulseMarker();
     }, []);
 
-    // Premium modern map style
-    const mapStyle = [
-        {
-            "elementType": "geometry",
-            "stylers": [{ "color": "#242f3e" }]
-        },
-        {
-            "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#746855" }]
-        },
-        {
-            "elementType": "labels.text.stroke",
-            "stylers": [{ "color": "#242f3e" }]
-        },
-        {
-            "featureType": "administrative.locality",
-            "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#d59563" }]
-        },
-        {
-            "featureType": "poi",
-            "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#d59563" }]
-        },
-        {
-            "featureType": "poi.park",
-            "elementType": "geometry",
-            "stylers": [{ "color": "#263c3f" }]
-        },
-        {
-            "featureType": "poi.park",
-            "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#6b9a76" }]
-        },
-        {
-            "featureType": "road",
-            "elementType": "geometry",
-            "stylers": [{ "color": "#38414e" }]
-        },
-        {
-            "featureType": "road",
-            "elementType": "geometry.stroke",
-            "stylers": [{ "color": "#212a37" }]
-        },
-        {
-            "featureType": "road",
-            "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#9ca5b3" }]
-        },
-        {
-            "featureType": "road.highway",
-            "elementType": "geometry",
-            "stylers": [{ "color": "#746855" }]
-        },
-        {
-            "featureType": "road.highway",
-            "elementType": "geometry.stroke",
-            "stylers": [{ "color": "#1f2835" }]
-        },
-        {
-            "featureType": "road.highway",
-            "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#f3d19c" }]
-        },
-        {
-            "featureType": "transit",
-            "elementType": "geometry",
-            "stylers": [{ "color": "#2f3948" }]
-        },
-        {
-            "featureType": "water",
-            "elementType": "geometry",
-            "stylers": [{ "color": "#17263c" }]
-        },
-        {
-            "featureType": "water",
-            "elementType": "labels.text.fill",
-            "stylers": [{ "color": "#515c6d" }]
-        },
-        {
-            "featureType": "water",
-            "elementType": "labels.text.stroke",
-            "stylers": [{ "color": "#17263c" }]
-        }
-    ];
-
     return (
         <View style={[styles.container, style]}>
             <MapView
@@ -139,7 +53,7 @@ const CustomMapView = forwardRef<CustomMapViewRef, CustomMapViewProps>(({ style,
                 style={styles.map}
                 provider={Platform.OS === 'ios' ? undefined : PROVIDER_GOOGLE}
                 mapType={mapType}
-                customMapStyle={mapStyle}
+                customMapStyle={darkMapStyle}
                 showsUserLocation
                 showsMyLocationButton
                 showsCompass
@@ -171,9 +85,6 @@ const CustomMapView = forwardRef<CustomMapViewRef, CustomMapViewProps>(({ style,
                         <Callout>
                             <BlurView intensity={90} tint="dark" style={styles.callout}>
                                 <MaterialCommunityIcons name="crosshairs-gps" size={20} color={colors.primary} />
-                                <View style={styles.calloutTextContainer}>
-                                    <View style={styles.calloutPin} />
-                                </View>
                             </BlurView>
                         </Callout>
                     </Marker>
@@ -222,27 +133,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         minWidth: 120,
-    },
-    calloutTextContainer: {
-        marginLeft: 10,
-    },
-    calloutPin: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: '#FFFFFF',
-        position: 'absolute',
-        bottom: -15,
-        left: '50%',
-        marginLeft: -5,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
     },
 });
 

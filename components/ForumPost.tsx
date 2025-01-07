@@ -1,10 +1,11 @@
 import React from 'react';
-import { StyleSheet, Pressable, View } from 'react-native';
+import { StyleSheet, Pressable, View, Platform } from 'react-native';
 import { Text } from './Themed';
 import { Link } from 'expo-router';
 import { ForumPost } from '../types';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@react-navigation/native';
+import { CommonStyles } from '../constants/Styles';
 
 interface ForumPostProps {
     post: ForumPost;
@@ -58,14 +59,10 @@ export default function ForumPost({ post }: ForumPostProps) {
 
 const styles = StyleSheet.create({
     postContainer: {
-        borderRadius: 12,
         padding: 16,
         marginBottom: 12,
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        ...CommonStyles.roundedCorners,
+        ...CommonStyles.shadow,
     },
     postHeader: {
         flexDirection: 'row',
