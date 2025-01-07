@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, TextStyle, View } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 
 interface CustomButtonProps {
@@ -7,86 +7,129 @@ interface CustomButtonProps {
     onPress: () => void;
     style?: ViewStyle;
     textStyle?: TextStyle;
-    disabled?: boolean;
     loading?: boolean;
+    disabled?: boolean;
     variant?: 'primary' | 'secondary' | 'outline';
+    size?: 'small' | 'medium' | 'large';
+    fullWidth?: boolean;
+    color?: string;
 }
 
-// Wrapping the component with forwardRef to handle refs properly
-const CustomButton = forwardRef<TouchableOpacity, CustomButtonProps>(({
+const CustomButton = forwardRef<View, CustomButtonProps>(({
     title,
     onPress,
     style,
     textStyle,
-    disabled = false,
     loading = false,
+    disabled = false,
     variant = 'primary',
+    size = 'medium',
+    fullWidth = false,
+    color,
 }, ref) => {
     const { colors } = useTheme();
 
-    const getButtonStyle = (): ViewStyle => {
+    const getButtonStyle = () => {
+        const baseStyle: ViewStyle = {
+            paddingVertical: 12,
+            paddingHorizontal: 24,
+            borderRadius: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: disabled ? 0.6 : 1,
+        };
+
+        if (fullWidth) {
+            baseStyle.width = '100%';
+        }
+
+        switch (size) {
+            case 'small':
+                baseStyle.paddingVertical = 8;
+                baseStyle.paddingHorizontal = 16;
+                break;
+            case 'large':
+                baseStyle.paddingVertical = 16;
+                baseStyle.paddingHorizontal = 32;
+                break;
+        }
+
         switch (variant) {
             case 'primary':
-                return { backgroundColor: colors.primary };
+                return {
+                    ...baseStyle,
+                    backgroundColor: color || colors.primary,
+                };
             case 'secondary':
-                return { backgroundColor: colors.card };
+                return {
+                    ...baseStyle,
+                    backgroundColor: colors.card,
+                    borderWidth: 1,
+                    borderColor: colors.border,
+                };
             case 'outline':
-                return { backgroundColor: 'transparent', borderColor: colors.primary, borderWidth: 2 };
+                return {
+                    ...baseStyle,
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderColor: color || colors.primary,
+                };
             default:
-                return {};
+                return baseStyle;
         }
     };
 
-    const getTextColor = (): string => {
+    const getTextStyle = () => {
+        const baseStyle: TextStyle = {
+            fontSize: 16,
+            fontWeight: '600',
+        };
+
+        switch (size) {
+            case 'small':
+                baseStyle.fontSize = 14;
+                break;
+            case 'large':
+                baseStyle.fontSize = 18;
+                break;
+        }
+
         switch (variant) {
             case 'primary':
-                return colors.card;
+                return {
+                    ...baseStyle,
+                    color: '#FFFFFF',
+                };
             case 'secondary':
-                return colors.text;
+                return {
+                    ...baseStyle,
+                    color: colors.text,
+                };
             case 'outline':
-                return colors.primary;
+                return {
+                    ...baseStyle,
+                    color: color || colors.primary,
+                };
             default:
-                return colors.text;
+                return baseStyle;
         }
     };
 
     return (
         <TouchableOpacity
-            ref={ref}  // Forward the ref to TouchableOpacity
-            style={[styles.button, getButtonStyle(), disabled && styles.disabledButton, style]}
+            ref={ref}
+            style={[getButtonStyle(), style]}
             onPress={onPress}
             disabled={disabled || loading}
+            activeOpacity={0.7}
         >
             {loading ? (
-                <ActivityIndicator color={getTextColor()} />
+                <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : colors.primary} />
             ) : (
-                <Text style={[styles.text, { color: getTextColor() }, textStyle]}>
-                    {title}
-                </Text>
+                <Text style={[getTextStyle(), textStyle]}>{title}</Text>
             )}
         </TouchableOpacity>
     );
-});
-
-const styles = StyleSheet.create({
-    button: {
-        padding: 15,
-        borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-    },
-    disabledButton: {
-        opacity: 0.5,
-    },
-    text: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
 });
 
 export default CustomButton;

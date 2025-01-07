@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
   mapControls: {
     position: "absolute",
     right: 16,
-    top: Platform.OS === 'ios' ? 240 : 220, // Position below the contact buttons
+    top: Platform.OS === 'ios' ? 300 : 280,
     backgroundColor: "rgba(255, 255, 255, 0.98)",
     borderRadius: 12,
     padding: 8,
@@ -568,12 +568,16 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     position: "absolute",
-    left: 16, // Changed from right to left
-    top: Platform.OS === 'ios' ? 180 : 160,
+    left: 0,
+    right: 0,
+    top: Platform.OS === 'ios' ? 240 : 220,
     zIndex: 2000,
-    flexDirection: "column",
-    gap: 8,
+    flexDirection: "row",
+    gap: 12,
     backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 16,
   },
   buttonWrapper: {
     shadowColor: "#000",
@@ -584,23 +588,25 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 3.84,
     elevation: 5,
+    flex: 1,
+    maxWidth: 160,
   },
   button: {
     backgroundColor: "rgba(255, 255, 255, 0.98)",
     borderRadius: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-    width: 140,
+    justifyContent: "center",
+    width: '100%',
     borderWidth: 1,
     borderColor: "rgba(0, 0, 0, 0.1)",
   },
   buttonContent: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     gap: 8,
   },
   iconBackground: {
@@ -615,6 +621,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     color: "#333",
+    flexShrink: 1,
   },
   overlayContainer: {
     position: 'absolute',

@@ -8,6 +8,8 @@ import { collection, query, where, orderBy, onSnapshot, Timestamp, doc, getDoc, 
 import { handleFirebaseError } from '../../utils/errorHandler';
 import { Ionicons } from '@expo/vector-icons';
 import NewMessage from '../../components/NewMessage';
+import { useIsFocused } from '@react-navigation/native';
+import { markMessagesAsRead } from '../../utils/messageUtils';
 
 interface Message {
     id: string;
@@ -100,10 +102,18 @@ export default function MessagesScreen() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     const [showNewMessage, setShowNewMessage] = useState(false);
+    const isFocused = useIsFocused();
 
     const handleModalClose = () => {
         setShowNewMessage(false);
     };
+
+    useEffect(() => {
+        if (isFocused) {
+            // Mark all messages as read when the screen comes into focus
+            markMessagesAsRead();
+        }
+    }, [isFocused]);
 
     useEffect(() => {
         if (!auth.currentUser) {
@@ -159,8 +169,10 @@ export default function MessagesScreen() {
         return () => unsubscribe();
     }, []);
 
-    const handleMessagePress = (messageId: string) => {
-        router.push(`/message/${messageId}`);
+    const handleConversationOpen = async (conversationId: string) => {
+        // Mark messages from this specific conversation as read
+        await markMessagesAsRead(conversationId);
+        router.push(`/message/${conversationId}`);
     };
 
     if (loading) {
@@ -185,7 +197,7 @@ export default function MessagesScreen() {
                     renderItem={({ item }) => (
                         <MessageCard
                             message={item}
-                            onPress={() => handleMessagePress(item.id)}
+                            onPress={() => handleConversationOpen(item.id)}
                         />
                     )}
                     keyExtractor={(item) => item.id}

@@ -1,7 +1,9 @@
-import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import { StyleSheet, View, Platform, Animated } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, Marker, MapType, Region } from 'react-native-maps';
+import React, { useEffect, useRef, forwardRef, useImperativeHandle, useState } from 'react';
+import { StyleSheet, View, Platform, Animated, Dimensions } from 'react-native';
+import MapView, { PROVIDER_GOOGLE, Marker, MapType, Region, Callout } from 'react-native-maps';
 import { useTheme } from '@react-navigation/native';
+import { BlurView } from 'expo-blur';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface CustomMapViewProps {
     style?: object;
@@ -17,6 +19,7 @@ const CustomMapView = forwardRef<CustomMapViewRef, CustomMapViewProps>(({ style,
     const { colors } = useTheme();
     const markerScale = useRef(new Animated.Value(1)).current;
     const mapRef = useRef<MapView>(null);
+    const [region, setRegion] = useState<Region | null>(null);
 
     useImperativeHandle(ref, () => ({
         animateToRegion: (region: Region, duration: number) => {
@@ -29,12 +32,12 @@ const CustomMapView = forwardRef<CustomMapViewRef, CustomMapViewProps>(({ style,
             Animated.sequence([
                 Animated.timing(markerScale, {
                     toValue: 1.2,
-                    duration: 500,
+                    duration: 800,
                     useNativeDriver: true,
                 }),
                 Animated.timing(markerScale, {
                     toValue: 1,
-                    duration: 500,
+                    duration: 800,
                     useNativeDriver: true,
                 }),
             ]).start(() => pulseMarker());
@@ -43,229 +46,203 @@ const CustomMapView = forwardRef<CustomMapViewRef, CustomMapViewProps>(({ style,
         pulseMarker();
     }, []);
 
+    // Premium modern map style
     const mapStyle = [
         {
-            "featureType": "all",
-            "elementType": "geometry.fill",
-            "stylers": [
-                {
-                    "weight": "2.00"
-                }
-            ]
+            "elementType": "geometry",
+            "stylers": [{ "color": "#242f3e" }]
         },
         {
-            "featureType": "all",
-            "elementType": "geometry.stroke",
-            "stylers": [
-                {
-                    "color": "#9c9c9c"
-                }
-            ]
+            "elementType": "labels.text.fill",
+            "stylers": [{ "color": "#746855" }]
         },
         {
-            "featureType": "all",
-            "elementType": "labels.text",
-            "stylers": [
-                {
-                    "visibility": "on"
-                }
-            ]
+            "elementType": "labels.text.stroke",
+            "stylers": [{ "color": "#242f3e" }]
         },
         {
-            "featureType": "landscape",
-            "elementType": "all",
-            "stylers": [
-                {
-                    "color": "#f2f2f2"
-                }
-            ]
-        },
-        {
-            "featureType": "landscape",
-            "elementType": "geometry.fill",
-            "stylers": [
-                {
-                    "color": "#ffffff"
-                }
-            ]
-        },
-        {
-            "featureType": "landscape.man_made",
-            "elementType": "geometry.fill",
-            "stylers": [
-                {
-                    "color": "#ffffff"
-                }
-            ]
+            "featureType": "administrative.locality",
+            "elementType": "labels.text.fill",
+            "stylers": [{ "color": "#d59563" }]
         },
         {
             "featureType": "poi",
-            "elementType": "all",
-            "stylers": [
-                {
-                    "visibility": "off"
-                }
-            ]
+            "elementType": "labels.text.fill",
+            "stylers": [{ "color": "#d59563" }]
+        },
+        {
+            "featureType": "poi.park",
+            "elementType": "geometry",
+            "stylers": [{ "color": "#263c3f" }]
+        },
+        {
+            "featureType": "poi.park",
+            "elementType": "labels.text.fill",
+            "stylers": [{ "color": "#6b9a76" }]
         },
         {
             "featureType": "road",
-            "elementType": "all",
-            "stylers": [
-                {
-                    "saturation": -100
-                },
-                {
-                    "lightness": 45
-                }
-            ]
+            "elementType": "geometry",
+            "stylers": [{ "color": "#38414e" }]
         },
         {
             "featureType": "road",
-            "elementType": "geometry.fill",
-            "stylers": [
-                {
-                    "color": "#eeeeee"
-                }
-            ]
+            "elementType": "geometry.stroke",
+            "stylers": [{ "color": "#212a37" }]
         },
         {
             "featureType": "road",
             "elementType": "labels.text.fill",
-            "stylers": [
-                {
-                    "color": "#7b7b7b"
-                }
-            ]
-        },
-        {
-            "featureType": "road",
-            "elementType": "labels.text.stroke",
-            "stylers": [
-                {
-                    "color": "#ffffff"
-                }
-            ]
+            "stylers": [{ "color": "#9ca5b3" }]
         },
         {
             "featureType": "road.highway",
-            "elementType": "all",
-            "stylers": [
-                {
-                    "visibility": "simplified"
-                }
-            ]
+            "elementType": "geometry",
+            "stylers": [{ "color": "#746855" }]
         },
         {
-            "featureType": "road.arterial",
-            "elementType": "labels.icon",
-            "stylers": [
-                {
-                    "visibility": "off"
-                }
-            ]
+            "featureType": "road.highway",
+            "elementType": "geometry.stroke",
+            "stylers": [{ "color": "#1f2835" }]
+        },
+        {
+            "featureType": "road.highway",
+            "elementType": "labels.text.fill",
+            "stylers": [{ "color": "#f3d19c" }]
         },
         {
             "featureType": "transit",
-            "elementType": "all",
-            "stylers": [
-                {
-                    "visibility": "off"
-                }
-            ]
+            "elementType": "geometry",
+            "stylers": [{ "color": "#2f3948" }]
         },
         {
             "featureType": "water",
-            "elementType": "all",
-            "stylers": [
-                {
-                    "color": "#46bcec"
-                },
-                {
-                    "visibility": "on"
-                }
-            ]
-        },
-        {
-            "featureType": "water",
-            "elementType": "geometry.fill",
-            "stylers": [
-                {
-                    "color": "#c8d7d4"
-                }
-            ]
+            "elementType": "geometry",
+            "stylers": [{ "color": "#17263c" }]
         },
         {
             "featureType": "water",
             "elementType": "labels.text.fill",
-            "stylers": [
-                {
-                    "color": "#070707"
-                }
-            ]
+            "stylers": [{ "color": "#515c6d" }]
         },
         {
             "featureType": "water",
             "elementType": "labels.text.stroke",
-            "stylers": [
-                {
-                    "color": "#ffffff"
-                }
-            ]
+            "stylers": [{ "color": "#17263c" }]
         }
     ];
 
     return (
-        <MapView
-            ref={mapRef}
-            style={[styles.map, style]}
-            provider={Platform.OS === 'ios' ? undefined : PROVIDER_GOOGLE}
-            mapType={mapType}
-            customMapStyle={mapStyle}
-            initialRegion={{
-                latitude: currentLocation?.latitude || 37.78825,
-                longitude: currentLocation?.longitude || -122.4324,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-            }}
-            showsUserLocation={false}
-            showsMyLocationButton={true}
-            showsCompass={true}
-            showsScale={true}
-        >
-            {currentLocation && (
-                <Marker
-                    coordinate={currentLocation}
-                    title="You are here"
-                >
-                    <Animated.View style={[styles.markerContainer, { transform: [{ scale: markerScale }] }]}>
-                        <View style={styles.marker} />
-                    </Animated.View>
-                </Marker>
-            )}
-        </MapView>
+        <View style={[styles.container, style]}>
+            <MapView
+                ref={mapRef}
+                style={styles.map}
+                provider={Platform.OS === 'ios' ? undefined : PROVIDER_GOOGLE}
+                mapType={mapType}
+                customMapStyle={mapStyle}
+                showsUserLocation
+                showsMyLocationButton
+                showsCompass
+                showsScale
+                rotateEnabled
+                scrollEnabled
+                zoomEnabled
+                pitchEnabled
+                initialRegion={currentLocation ? {
+                    latitude: currentLocation.latitude,
+                    longitude: currentLocation.longitude,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421,
+                } : undefined}
+            >
+                {currentLocation && (
+                    <Marker
+                        coordinate={{
+                            latitude: currentLocation.latitude,
+                            longitude: currentLocation.longitude,
+                        }}
+                    >
+                        <Animated.View style={[styles.markerContainer, { transform: [{ scale: markerScale }] }]}>
+                            <View style={styles.marker}>
+                                <MaterialCommunityIcons name="map-marker" size={40} color={colors.primary} />
+                                <View style={styles.markerDot} />
+                            </View>
+                        </Animated.View>
+                        <Callout>
+                            <BlurView intensity={90} tint="dark" style={styles.callout}>
+                                <MaterialCommunityIcons name="crosshairs-gps" size={20} color={colors.primary} />
+                                <View style={styles.calloutTextContainer}>
+                                    <View style={styles.calloutPin} />
+                                </View>
+                            </BlurView>
+                        </Callout>
+                    </Marker>
+                )}
+            </MapView>
+        </View>
     );
 });
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        overflow: 'hidden',
+        borderRadius: 20,
+    },
     map: {
         width: '100%',
         height: '100%',
     },
     markerContainer: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: 'rgba(231, 76, 60, 0.3)',
-        justifyContent: 'center',
         alignItems: 'center',
+        justifyContent: 'center',
     },
     marker: {
-        width: 20,
-        height: 20,
+        alignItems: 'center',
+    },
+    markerDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#FFFFFF',
+        position: 'absolute',
+        top: '50%',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    callout: {
+        padding: 10,
         borderRadius: 10,
-        backgroundColor: '#e74c3c',
-        borderWidth: 2,
-        borderColor: 'white',
+        flexDirection: 'row',
+        alignItems: 'center',
+        minWidth: 120,
+    },
+    calloutTextContainer: {
+        marginLeft: 10,
+    },
+    calloutPin: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: '#FFFFFF',
+        position: 'absolute',
+        bottom: -15,
+        left: '50%',
+        marginLeft: -5,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
 });
 
