@@ -101,8 +101,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     map: {
-        width: '100%',
-        height: '100%',
+        flex: 1,
     },
     markerContainer: {
         alignItems: 'center',
@@ -110,29 +109,26 @@ const styles = StyleSheet.create({
     },
     marker: {
         alignItems: 'center',
+        justifyContent: 'center',
     },
     markerDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#FFFFFF',
         position: 'absolute',
+        width: 12,
+        height: 12,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 6,
         top: '50%',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        left: '50%',
+        marginLeft: -6,
+        marginTop: -6,
     },
     callout: {
-        padding: 10,
-        borderRadius: 10,
-        flexDirection: 'row',
+        padding: 8,
+        borderRadius: 8,
+        minWidth: 40,
+        minHeight: 40,
         alignItems: 'center',
-        minWidth: 120,
+        justifyContent: 'center',
     },
 });
 

@@ -10,14 +10,17 @@ import { CommonStyles } from '../constants/Styles';
 import { useScaleAnimation } from '../hooks/useScaleAnimation';
 
 const GRADIENT_COLORS = {
-    header: ['rgba(255,255,255,0.9)', 'rgba(255,255,255,1)'] as const,
-    avatar: (primary: string) => [`${primary}20`, `${primary}10`] as const,
+    header: ['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.98)'] as const,
+    avatar: (primary: string) => [`${primary}30`, `${primary}15`] as const,
 };
 
 const ProfileHeader: React.FC = () => {
     const { colors } = useTheme();
     const router = useRouter();
     const { scale, handlePressIn, handlePressOut } = useScaleAnimation();
+    const notificationScale = useScaleAnimation();
+    const addContactsScale = useScaleAnimation();
+    const policeContactScale = useScaleAnimation();
     const [userData, setUserData] = useState({
         name: '',
         avatar: null,
@@ -31,10 +34,11 @@ const ProfileHeader: React.FC = () => {
                 if (doc.exists()) {
                     const data = doc.data();
                     const firstName = data.fullName?.split(' ')[0] || 'User';
+                    const cityOnly = data.location?.address?.split(',')[0] || 'Location not set';
                     setUserData({
                         name: firstName,
                         avatar: data.profileImageUrl || null,
-                        location: data.location?.address || 'Location not set'
+                        location: cityOnly
                     });
                 }
             });
@@ -44,63 +48,136 @@ const ProfileHeader: React.FC = () => {
 
     const navigateToProfile = () => router.push('/profile');
     const navigateToNotifications = () => router.push('/notifications');
+    const navigateToEmergencyContacts = () => router.push('/emergency-contacts');
+    const navigateToPoliceDatabase = () => router.push('/police-database');
 
     return (
         <View style={[styles.container, { backgroundColor: '#FFFFFF' }]}>
             <SafeAreaView style={styles.safeArea}>
                 <LinearGradient
-                    colors={GRADIENT_COLORS.header}
-                    style={styles.gradient}
+                    colors={['rgba(255,255,255,0.95)', '#FFFFFF']}
+                    style={styles.contentWrapper}
                 >
-                    <View style={styles.contentWrapper}>
-                        <View style={styles.topSection}>
-                            <TouchableOpacity
-                                style={styles.profileSection}
-                                onPress={navigateToProfile}
-                                onPressIn={handlePressIn}
-                                onPressOut={handlePressOut}
-                                accessibilityLabel={`${userData.name}'s profile`}
-                                accessibilityHint="Double tap to view your profile"
-                            >
-                                <Animated.View style={[styles.avatarContainer, { transform: [{ scale }] }]}>
-                                    <LinearGradient
-                                        colors={GRADIENT_COLORS.avatar(colors.primary)}
-                                        style={styles.avatarGradient}
-                                    >
-                                        <Image 
-                                            source={userData.avatar ? { uri: userData.avatar } : require('../assets/images/avatar.png')} 
-                                            style={styles.avatar}
-                                        />
-                                    </LinearGradient>
-                                </Animated.View>
-                                <View style={styles.textContainer}>
-                                    <Text style={[styles.greetingText, { color: colors.text + '80' }]}>Welcome back,</Text>
-                                    <Text style={[styles.nameText, { color: colors.text }]}>{userData.name}</Text>
-                                </View>
-                            </TouchableOpacity>
-                            <View style={styles.rightSection}>
-                                <TouchableOpacity
-                                    onPress={navigateToNotifications}
-                                    style={styles.notificationButton}
+                    {/* Top Bar */}
+                    <View style={styles.topBar}>
+                        <TouchableOpacity
+                            style={styles.profileTrigger}
+                            onPress={navigateToProfile}
+                            onPressIn={handlePressIn}
+                            onPressOut={handlePressOut}
+                        >
+                            <Animated.View style={[styles.avatarContainer, { transform: [{ scale }] }]}>
+                                <LinearGradient
+                                    colors={[colors.primary + '30', colors.primary + '15']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.avatarGradient}
                                 >
-                                    <Ionicons name="notifications-outline" size={22} color={colors.text} />
-                                </TouchableOpacity>
+                                    <Image 
+                                        source={userData.avatar ? { uri: userData.avatar } : require('../assets/images/avatar.png')} 
+                                        style={styles.avatar}
+                                    />
+                                </LinearGradient>
+                            </Animated.View>
+
+                            <View style={styles.userInfo}>
+                                <Text style={styles.greetingText}>Welcome back</Text>
+                                <Text style={styles.userName}>{userData.name}</Text>
                             </View>
-                        </View>
-                        <View style={styles.bottomSection}>
-                            <TouchableOpacity 
-                                style={[
-                                    styles.locationContainer, 
-                                    { backgroundColor: colors.primary + '08' },
-                                    CommonStyles.roundedCorners
-                                ]}
+                        </TouchableOpacity>
+
+                        <View style={styles.topBarActions}>
+                            <LinearGradient
+                                colors={[colors.primary + '10', colors.primary + '05']}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={styles.locationCard}
                             >
-                                <Ionicons name="location-outline" size={16} color={colors.primary} style={styles.locationIcon} />
-                                <Text style={[styles.locationText, { color: colors.text }]} numberOfLines={1}>
+                                <View style={styles.locationIcon}>
+                                    <Ionicons name="location" size={18} color={colors.primary} />
+                                </View>
+                                <Text style={styles.locationText} numberOfLines={1}>
                                     {userData.location}
                                 </Text>
+                            </LinearGradient>
+
+                            <TouchableOpacity
+                                onPress={navigateToNotifications}
+                                onPressIn={notificationScale.handlePressIn}
+                                onPressOut={notificationScale.handlePressOut}
+                                style={styles.notificationButton}
+                            >
+                                <Animated.View style={[styles.notificationContent, { transform: [{ scale: notificationScale.scale }] }]}>
+                                    <LinearGradient
+                                        colors={[colors.primary + '15', colors.primary + '05']}
+                                        style={styles.notificationGradient}
+                                    >
+                                        <Ionicons name="notifications" size={22} color={colors.primary} />
+                                    </LinearGradient>
+                                </Animated.View>
                             </TouchableOpacity>
                         </View>
+                    </View>
+
+                    {/* Action Cards */}
+                    <View style={styles.actionCards}>
+                        <TouchableOpacity
+                            style={styles.actionCard}
+                            onPress={navigateToEmergencyContacts}
+                            onPressIn={addContactsScale.handlePressIn}
+                            onPressOut={addContactsScale.handlePressOut}
+                        >
+                            <Animated.View style={[styles.actionCardContent, { transform: [{ scale: addContactsScale.scale }] }]}>
+                                <LinearGradient
+                                    colors={[colors.primary + '15', colors.primary + '05']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.actionCardGradient}
+                                >
+                                    <View style={styles.actionIconBox}>
+                                        <LinearGradient
+                                            colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.8)']}
+                                            style={styles.actionIconGradient}
+                                        >
+                                            <Ionicons name="person-add" size={22} color={colors.primary} />
+                                        </LinearGradient>
+                                    </View>
+                                    <View style={styles.actionTextContainer}>
+                                        <Text style={styles.actionTitle}>Emergency Contacts</Text>
+                                        <Text style={styles.actionSubtitle}>Manage your emergency contacts</Text>
+                                    </View>
+                                </LinearGradient>
+                            </Animated.View>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.actionCard}
+                            onPress={navigateToPoliceDatabase}
+                            onPressIn={policeContactScale.handlePressIn}
+                            onPressOut={policeContactScale.handlePressOut}
+                        >
+                            <Animated.View style={[styles.actionCardContent, { transform: [{ scale: policeContactScale.scale }] }]}>
+                                <LinearGradient
+                                    colors={[colors.primary + '15', colors.primary + '05']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.actionCardGradient}
+                                >
+                                    <View style={styles.actionIconBox}>
+                                        <LinearGradient
+                                            colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.8)']}
+                                            style={styles.actionIconGradient}
+                                        >
+                                            <Ionicons name="shield" size={22} color={colors.primary} />
+                                        </LinearGradient>
+                                    </View>
+                                    <View style={styles.actionTextContainer}>
+                                        <Text style={styles.actionTitle}>Police Database</Text>
+                                        <Text style={styles.actionSubtitle}>Access law enforcement contacts</Text>
+                                    </View>
+                                </LinearGradient>
+                            </Animated.View>
+                        </TouchableOpacity>
                     </View>
                 </LinearGradient>
             </SafeAreaView>
@@ -116,76 +193,140 @@ const styles = StyleSheet.create({
         right: 0,
         zIndex: 1000,
     },
-    gradient: {
-        width: '100%',
-        height: '100%',
-    },
     safeArea: {
         width: '100%',
     },
     contentWrapper: {
         paddingTop: Platform.OS === 'ios' ? 12 : 20,
         paddingBottom: 16,
-        paddingHorizontal: 20,
     },
-    topSection: {
-        ...CommonStyles.row,
+    topBar: {
+        flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'space-between',
+        paddingHorizontal: 16,
         marginBottom: 16,
     },
-    profileSection: {
-        ...CommonStyles.row,
-        flex: 1,
+    profileTrigger: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.02)',
+        padding: 8,
+        paddingRight: 16,
+        borderRadius: 16,
+        flex: 0.4,
+        marginRight: 12,
     },
     avatarContainer: {
-        marginRight: 15,
+        marginRight: 12,
     },
     avatarGradient: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         padding: 2,
-        borderRadius: 30,
     },
     avatar: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        borderWidth: 2,
-        borderColor: '#FFFFFF',
+        width: '100%',
+        height: '100%',
+        borderRadius: 20,
     },
-    textContainer: {
-        justifyContent: 'center',
+    userInfo: {
+        flex: 1,
     },
     greetingText: {
-        fontSize: 13,
-        fontWeight: '500',
+        fontSize: 12,
+        color: 'rgba(0,0,0,0.5)',
         marginBottom: 2,
+        fontWeight: '500',
     },
-    nameText: {
-        fontSize: 20,
-        fontWeight: '700',
-        letterSpacing: -0.5,
+    userName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#000',
+        letterSpacing: -0.3,
     },
-    rightSection: {
-        ...CommonStyles.row,
+    topBarActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        flex: 0.6,
     },
-    notificationButton: {
-        marginLeft: 8,
-    },
-    bottomSection: {
-        ...CommonStyles.row,
-    },
-    locationContainer: {
-        ...CommonStyles.row,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        maxWidth: '80%',
+    locationCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 10,
+        borderRadius: 14,
+        flex: 1,
     },
     locationIcon: {
-        marginRight: 6,
+        width: 28,
+        height: 28,
+        borderRadius: 8,
+        backgroundColor: 'rgba(255,255,255,0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 8,
     },
     locationText: {
         fontSize: 13,
         fontWeight: '500',
+        color: '#000',
         flex: 1,
+    },
+    notificationButton: {
+        borderRadius: 14,
+    },
+    notificationContent: {
+        borderRadius: 14,
+        overflow: 'hidden',
+    },
+    notificationGradient: {
+        width: 44,
+        height: 44,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.02)',
+    },
+    actionCards: {
+        paddingHorizontal: 16,
+        gap: 8,
+    },
+    actionCard: {
+        borderRadius: 16,
+        overflow: 'hidden',
+    },
+    actionCardContent: {
+        width: '100%',
+    },
+    actionCardGradient: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+    },
+    actionIconBox: {
+        marginRight: 16,
+    },
+    actionIconGradient: {
+        width: 44,
+        height: 44,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    actionTextContainer: {
+        flex: 1,
+    },
+    actionTitle: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#000',
+        marginBottom: 4,
+    },
+    actionSubtitle: {
+        fontSize: 13,
+        color: 'rgba(0,0,0,0.5)',
+        fontWeight: '500',
     },
 });
 

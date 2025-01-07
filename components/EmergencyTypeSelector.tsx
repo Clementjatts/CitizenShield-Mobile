@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
@@ -13,9 +13,12 @@ interface EmergencyType {
 type EmergencyTypeId = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '13' | '14' | '15' | '16';
 
 interface EmergencyTypeSelectorProps {
-    selectedType: EmergencyTypeId | null;
+    visible: boolean;
+    onClose: () => void;
+    selectedType?: EmergencyTypeId | null;
     onSelect: (type: EmergencyTypeId) => void;
-    onEmergencyTrigger: (type: EmergencyTypeId) => void;
+    onEmergencyTrigger?: (type: EmergencyTypeId) => void;
+    disabled?: boolean;
 }
 
 const EMERGENCY_TYPES: EmergencyType[] = [
@@ -57,22 +60,27 @@ const emergencyTypeColors: Record<EmergencyTypeId, string> = {
 };
 
 const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
+    visible,
+    onClose,
     selectedType,
     onSelect,
     onEmergencyTrigger,
+    disabled,
 }) => {
     const { colors } = useTheme();
     const lastTapRef = useRef<{ time: number; id: EmergencyTypeId } | null>(null);
     const DOUBLE_TAP_DELAY = 300; // milliseconds
 
     const handlePress = (typeId: EmergencyTypeId) => {
+        if (disabled) return;
+
         const now = Date.now();
         const lastTap = lastTapRef.current;
 
         if (lastTap && lastTap.id === typeId && now - lastTap.time < DOUBLE_TAP_DELAY) {
             // Double tap detected
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            onEmergencyTrigger(typeId);
+            onEmergencyTrigger && onEmergencyTrigger(typeId);
             lastTapRef.current = null;
         } else {
             // First tap
@@ -83,108 +91,102 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
     };
 
     const renderGridItems = () => {
-        const rows = [];
-        for (let i = 0; i < EMERGENCY_TYPES.length; i += 4) {
-            const rowItems = EMERGENCY_TYPES.slice(i, i + 4);
-            const row = (
-                <View key={i} style={styles.gridContainer}>
-                    {rowItems.map((type) => (
-                        <TouchableOpacity
-                            key={type.id}
-                            style={[
-                                styles.card,
-                                {
-                                    backgroundColor: emergencyTypeColors[type.id],
-                                },
-                                selectedType === type.id && styles.selectedCard
-                            ]}
-                            onPress={() => handlePress(type.id)}
-                        >
+        return (
+            <View style={styles.grid}>
+                {EMERGENCY_TYPES.map((type) => (
+                    <TouchableOpacity
+                        key={type.id}
+                        style={[
+                            styles.item,
+                            {
+                                backgroundColor: emergencyTypeColors[type.id],
+                                opacity: selectedType === type.id ? 0.9 : 1,
+                            },
+                            selectedType === type.id && styles.selectedItem,
+                            disabled && styles.disabledItem,
+                        ]}
+                        onPress={() => handlePress(type.id)}
+                        disabled={disabled}
+                    >
+                        <View style={styles.itemContent}>
                             <Ionicons
                                 name={type.icon}
-                                size={24}
-                                color={'#FFFFFF'}
-                                style={styles.cardIcon}
+                                size={20}
+                                color={selectedType === type.id ? colors.primary : 'white'}
+                                style={styles.icon}
                             />
-                            <Text
-                                style={[
-                                    styles.cardText,
-                                ]}
-                                numberOfLines={1}
-                            >
+                            <Text style={[styles.text, { color: 'white' }]}>
                                 {type.title}
                             </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            );
-            rows.push(row);
-        }
-        return rows;
+                        </View>
+                    </TouchableOpacity>
+                ))}
+            </View>
+        );
     };
+
+    if (!visible) return null;
 
     return (
         <View style={styles.container}>
-            <ScrollView
-                contentContainerStyle={styles.scrollViewContent}
-                showsVerticalScrollIndicator={false}
-            >
-                {renderGridItems()}
-            </ScrollView>
+            {renderGridItems()}
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        position: 'absolute',
-        bottom: Platform.OS === 'ios' ? 20 : 10, // Reduced bottom margin
-        left: 0,
-        right: 0,
-        paddingHorizontal: 12, // Reduced horizontal padding
-    },
-    scrollViewContent: {
-        paddingVertical: 4, // Reduced vertical padding
-    },
-    gridContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        gap: 6, // Reduced gap
-    },
-    card: {
-        width: '22%', // Slightly reduced width
-        aspectRatio: 0.9, // Slightly reduced height while maintaining reasonable proportions
-        borderRadius: 12, // Slightly reduced border radius
-        padding: 6, // Reduced padding
+        backgroundColor: 'transparent',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        paddingTop: 16,
+        paddingBottom: Platform.OS === 'ios' ? 16 : 16,
+        height: '45%',
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
     },
-    selectedCard: {
-        transform: [{ scale: 1.05 }],
-        shadowOpacity: 0.4,
-        shadowRadius: 5,
-        elevation: 8,
+    grid: {
+        width: '100%',
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        gap: 8,
     },
-    cardIcon: {
+    item: {
+        width: '23%',
+        aspectRatio: 1,
+        borderRadius: 12,
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.1)',
+    },
+    selectedItem: {
+        borderColor: '#007AFF',
+        backgroundColor: '#007AFF10',
+    },
+    disabledItem: {
+        opacity: 0.5,
+    },
+    itemContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    icon: {
         marginBottom: 4,
     },
-    cardText: {
-        fontSize: 10, // Reduced font size
-        fontWeight: '600',
+    text: {
+        fontSize: 11,
         textAlign: 'center',
-        color: '#FFFFFF',
-        textShadowColor: 'rgba(0, 0, 0, 0.3)',
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 2,
+        color: '#333',
+        fontWeight: '500',
+    },
+    selectedText: {
+        color: '#007AFF',
+        fontWeight: '600',
     },
 });
 
