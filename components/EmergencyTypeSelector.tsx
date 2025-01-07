@@ -1,8 +1,14 @@
-import React, { useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '@react-navigation/native';
-import * as Haptics from 'expo-haptics';
+import React, { useRef } from "react";
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Platform,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@react-navigation/native";
+import * as Haptics from "expo-haptics";
 
 interface EmergencyType {
     id: EmergencyTypeId;
@@ -10,7 +16,23 @@ interface EmergencyType {
     icon: keyof typeof Ionicons.glyphMap;
 }
 
-type EmergencyTypeId = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12' | '13' | '14' | '15' | '16';
+type EmergencyTypeId =
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9"
+    | "10"
+    | "11"
+    | "12"
+    | "13"
+    | "14"
+    | "15"
+    | "16";
 
 interface EmergencyTypeSelectorProps {
     visible: boolean;
@@ -22,41 +44,41 @@ interface EmergencyTypeSelectorProps {
 }
 
 const EMERGENCY_TYPES: EmergencyType[] = [
-    { id: '1', title: 'Life Threat', icon: 'warning-outline' },
-    { id: '2', title: 'Police Abuse', icon: 'shield-outline' },
-    { id: '3', title: 'Medical', icon: 'medical-outline' },
-    { id: '4', title: 'Fire', icon: 'flame-outline' },
-    { id: '5', title: 'Traffic', icon: 'car-outline' },
-    { id: '6', title: 'Disaster', icon: 'alert-circle-outline' },
-    { id: '7', title: 'Domestic', icon: 'home-outline' },
-    { id: '8', title: 'Mental', icon: 'heart-outline' },
-    { id: '9', title: 'Kidnap', icon: 'person-remove-outline' },
-    { id: '10', title: 'Burglary', icon: 'key-outline' },
-    { id: '11', title: 'Assault', icon: 'hand-right-outline' },
-    { id: '12', title: 'Stalking', icon: 'eye-outline' },
-    { id: '13', title: 'Robbery', icon: 'cash-outline' },
-    { id: '14', title: 'Shooting', icon: 'radio-outline' },
-    { id: '15', title: 'Terrorism', icon: 'alert-outline' },
-    { id: '16', title: 'Riot', icon: 'people-outline' }
+    { id: "1", title: "Life Threat", icon: "warning-outline" },
+    { id: "2", title: "Police Abuse", icon: "shield-outline" },
+    { id: "3", title: "Medical", icon: "medical-outline" },
+    { id: "4", title: "Fire", icon: "flame-outline" },
+    { id: "5", title: "Traffic", icon: "car-outline" },
+    { id: "6", title: "Disaster", icon: "alert-circle-outline" },
+    { id: "7", title: "Domestic", icon: "home-outline" },
+    { id: "8", title: "Mental", icon: "heart-outline" },
+    { id: "9", title: "Kidnap", icon: "person-remove-outline" },
+    { id: "10", title: "Burglary", icon: "key-outline" },
+    { id: "11", title: "Assault", icon: "hand-right-outline" },
+    { id: "12", title: "Stalking", icon: "eye-outline" },
+    { id: "13", title: "Robbery", icon: "cash-outline" },
+    { id: "14", title: "Shooting", icon: "radio-outline" },
+    { id: "15", title: "Terrorism", icon: "alert-outline" },
+    { id: "16", title: "Riot", icon: "people-outline" },
 ];
 
 const emergencyTypeColors: Record<EmergencyTypeId, string> = {
-    '1': '#FF3B30', // Life Threat - Red
-    '2': '#5856D6', // Police Abuse - Purple
-    '3': '#32ADE6', // Medical - Blue
-    '4': '#FF9500', // Fire - Orange
-    '5': '#FFCC00', // Traffic - Yellow
-    '6': '#FF2D55', // Disaster - Pink
-    '7': '#AF52DE', // Domestic - Purple
-    '8': '#5AC8FA', // Mental - Light Blue
-    '9': '#FF6B6B', // Kidnap - Coral
-    '10': '#4A90E2', // Burglary - Blue
-    '11': '#FF4F81', // Assault - Pink Red
-    '12': '#9B59B6', // Stalking - Purple
-    '13': '#E67E22', // Robbery - Orange
-    '14': '#E74C3C', // Shooting - Red
-    '15': '#C0392B', // Terrorism - Dark Red
-    '16': '#8E44AD', // Riot - Deep Purple
+    "1": "#FF3B30", // Life Threat - Red
+    "2": "#5856D6", // Police Abuse - Purple
+    "3": "#32ADE6", // Medical - Blue
+    "4": "#FF9500", // Fire - Orange
+    "5": "#FFCC00", // Traffic - Yellow
+    "6": "#FF2D55", // Disaster - Pink
+    "7": "#AF52DE", // Domestic - Purple
+    "8": "#5AC8FA", // Mental - Light Blue
+    "9": "#FF6B6B", // Kidnap - Coral
+    "10": "#4A90E2", // Burglary - Blue
+    "11": "#FF4F81", // Assault - Pink Red
+    "12": "#9B59B6", // Stalking - Purple
+    "13": "#E67E22", // Robbery - Orange
+    "14": "#E74C3C", // Shooting - Red
+    "15": "#C0392B", // Terrorism - Dark Red
+    "16": "#8E44AD", // Riot - Deep Purple
 };
 
 const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
@@ -77,7 +99,11 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
         const now = Date.now();
         const lastTap = lastTapRef.current;
 
-        if (lastTap && lastTap.id === typeId && now - lastTap.time < DOUBLE_TAP_DELAY) {
+        if (
+            lastTap &&
+            lastTap.id === typeId &&
+            now - lastTap.time < DOUBLE_TAP_DELAY
+        ) {
             // Double tap detected
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             onEmergencyTrigger && onEmergencyTrigger(typeId);
@@ -112,10 +138,10 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
                             <Ionicons
                                 name={type.icon}
                                 size={20}
-                                color={selectedType === type.id ? colors.primary : 'white'}
+                                color={selectedType === type.id ? colors.primary : "white"}
                                 style={styles.icon}
                             />
-                            <Text style={[styles.text, { color: 'white' }]}>
+                            <Text style={[styles.text, { color: "white" }]}>
                                 {type.title}
                             </Text>
                         </View>
@@ -129,6 +155,12 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
 
     return (
         <View style={styles.container}>
+            <View style={styles.instructionBox}>
+                <Text style={styles.instructionText}>
+                    Tap once to select an emergency type.{"\n"}
+                    Double tap to trigger emergency alert.
+                </Text>
+            </View>
             {renderGridItems()}
         </View>
     );
@@ -136,57 +168,82 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: 'transparent',
+        backgroundColor: "transparent",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         paddingTop: 16,
-        paddingBottom: Platform.OS === 'ios' ? 16 : 16,
-        height: '45%',
-        justifyContent: 'center',
-        alignItems: 'center',
+        paddingBottom: Platform.OS === "ios" ? 16 : 16,
+        height: "50%",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    instructionBox: {
+        backgroundColor: "white",
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 16,
+        marginHorizontal: 16,
+        width: "auto",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+        borderWidth: Platform.OS === "ios" ? 0 : 1,
+        borderColor: "rgba(0,0,0,0.1)",
+    },
+    instructionText: {
+        textAlign: "center",
+        fontSize: 14,
+        color: "#333",
+        lineHeight: 22,
+        fontWeight: "500",
     },
     grid: {
-        width: '100%',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        alignItems: 'center',
+        width: "100%",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        alignItems: "center",
         paddingHorizontal: 16,
         gap: 8,
     },
     item: {
-        width: '23%',
-        aspectRatio: 1,
+        width: "23%",
+        aspectRatio: 1.2,
         borderRadius: 12,
-        backgroundColor: 'white',
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: "white",
+        justifyContent: "center",
+        alignItems: "center",
         borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.1)',
+        borderColor: "rgba(0,0,0,0.1)",
     },
     selectedItem: {
-        borderColor: '#007AFF',
-        backgroundColor: '#007AFF10',
+        borderColor: "#007AFF",
+        backgroundColor: "#007AFF10",
     },
     disabledItem: {
         opacity: 0.5,
     },
     itemContent: {
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
     },
     icon: {
         marginBottom: 4,
     },
     text: {
         fontSize: 11,
-        textAlign: 'center',
-        color: '#333',
-        fontWeight: '500',
+        textAlign: "center",
+        color: "#333",
+        fontWeight: "500",
     },
     selectedText: {
-        color: '#007AFF',
-        fontWeight: '600',
+        color: "#007AFF",
+        fontWeight: "600",
     },
 });
 

@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, StyleSheet, Share, Platform, Alert, Dimensions, Animated, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Share,
+  Platform,
+  Alert,
+  Dimensions,
+  Animated,
+  TouchableOpacity,
+} from "react-native";
 import { useTheme } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -11,9 +20,17 @@ import ProfileHeader from "../../components/ProfileHeader";
 import CustomMapView, { CustomMapViewRef } from "../../components/MapView";
 import EmergencyTypeSelector from "../../components/EmergencyTypeSelector";
 import { auth, db } from "../../config/firebaseConfig";
-import { doc, setDoc, collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { handleFirebaseError } from "../../utils/errorHandler";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 
 interface LocationCoords {
   latitude: number;
@@ -28,7 +45,23 @@ interface EmergencyData {
   status: string;
 }
 
-type EmergencyTypeId = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "13" | "14" | "15" | "16";
+type EmergencyTypeId =
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | "6"
+  | "7"
+  | "8"
+  | "9"
+  | "10"
+  | "11"
+  | "12"
+  | "13"
+  | "14"
+  | "15"
+  | "16";
 
 const TRACKING_DURATION = 2 * 60 * 60 * 1000;
 const UPDATE_INTERVAL = 15 * 60 * 1000;
@@ -52,7 +85,7 @@ const getEmergencyTypeText = (typeId: string): string => {
     "13": "Robbery",
     "14": "Shooting",
     "15": "Terrorism",
-    "16": "Riot"
+    "16": "Riot",
   };
   return (
     emergencyTypes[typeId as keyof typeof emergencyTypes] || "Unknown Emergency"
@@ -108,7 +141,9 @@ const HomeScreen = () => {
   const router = useRouter();
   const mapViewRef = useRef<CustomMapViewRef>(null);
   const [mapType, setMapType] = useState<MapType>("standard");
-  const [currentLocation, setCurrentLocation] = useState<LocationCoords | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<LocationCoords | null>(
+    null
+  );
   const [showEmergencyTypes, setShowEmergencyTypes] = useState(true);
   const animatedButtonScale = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -282,11 +317,14 @@ const HomeScreen = () => {
   const handleEmergencyTrigger = async (typeId: EmergencyTypeId) => {
     try {
       setIsLoading(true);
-      
+
       // Get current location
       const location = await getCurrentLocation();
       if (!location) {
-        Alert.alert('Error', 'Unable to get your location. Please enable location services and try again.');
+        Alert.alert(
+          "Error",
+          "Unable to get your location. Please enable location services and try again."
+        );
         setIsLoading(false);
         return;
       }
@@ -299,20 +337,19 @@ const HomeScreen = () => {
         type: typeId,
         location: location,
         timestamp: new Date().toISOString(),
-        userId: auth.currentUser?.uid || '',
-        status: 'active'
+        userId: auth.currentUser?.uid || "",
+        status: "active",
       });
 
       // Show success message
       Alert.alert(
-        'Emergency Alert Sent',
-        'Your emergency contacts have been notified of your situation.',
-        [{ text: 'OK' }]
+        "Emergency Alert Sent",
+        "Your emergency contacts have been notified of your situation.",
+        [{ text: "OK" }]
       );
-
     } catch (error) {
-      console.error('Error sending emergency alert:', error);
-      Alert.alert('Error', 'Failed to send emergency alert. Please try again.');
+      console.error("Error sending emergency alert:", error);
+      Alert.alert("Error", "Failed to send emergency alert. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -409,7 +446,7 @@ const HomeScreen = () => {
       <View style={styles.headerContainer}>
         <ProfileHeader />
       </View>
-      
+
       <View style={styles.mapContainer}>
         <CustomMapView
           ref={mapViewRef}
@@ -417,14 +454,14 @@ const HomeScreen = () => {
           mapType={mapType}
           currentLocation={currentLocation}
         />
-        
+
         <View style={[styles.mapControls, { right: 16 }]}>
           <TouchableOpacity
             style={styles.mapControlButton}
             onPress={shareLocation}
           >
             <LinearGradient
-              colors={['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.9)']}
+              colors={["rgba(255,255,255,0.95)", "rgba(255,255,255,0.9)"]}
               style={styles.controlButtonCircle}
             >
               <Ionicons name="share-outline" size={22} color={colors.primary} />
@@ -432,7 +469,7 @@ const HomeScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-      
+
       <View style={styles.emergencyTypeContainer}>
         <EmergencyTypeSelector
           visible={showEmergencyTypes}
@@ -449,36 +486,36 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   headerContainer: {
-    width: '100%',
-    height: Platform.OS === 'ios' ? 140 : 120,
-    backgroundColor: 'transparent',
+    width: "100%",
+    height: Platform.OS === "ios" ? 140 : 120,
+    backgroundColor: "transparent",
     zIndex: 1000,
   },
   mapContainer: {
     flex: 1,
     marginBottom: 0,
     borderRadius: 0,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   map: {
     flex: 1,
   },
   mapControls: {
-    position: 'absolute',
-    top: 180,
-    backgroundColor: 'transparent',
+    position: "absolute",
+    top: 210,
+    backgroundColor: "transparent",
     borderRadius: 12,
     padding: 6,
   },
   mapControlButton: {
     borderRadius: 30,
-    overflow: 'hidden',
+    overflow: "hidden",
     ...Platform.select({
       ios: {
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.15,
         shadowRadius: 6,
@@ -492,14 +529,14 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.3)',
-    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "rgba(255,255,255,0.95)",
   },
   emergencyTypeContainer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,

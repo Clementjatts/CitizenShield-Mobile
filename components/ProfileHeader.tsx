@@ -6,12 +6,13 @@ import { useRouter } from 'expo-router';
 import { auth, db } from '../config/firebaseConfig';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CommonStyles } from '../constants/Styles';
 import { useScaleAnimation } from '../hooks/useScaleAnimation';
 
 const GRADIENT_COLORS = {
     header: ['rgba(255,255,255,0.95)', 'rgba(255,255,255,0.98)'] as const,
     avatar: (primary: string) => [`${primary}30`, `${primary}15`] as const,
+    notification: (primary: string) => [`${primary}20`, `${primary}10`] as const,
+    action: (primary: string) => [`${primary}20`, `${primary}08`] as const,
 };
 
 const ProfileHeader: React.FC = () => {
@@ -109,7 +110,7 @@ const ProfileHeader: React.FC = () => {
                             >
                                 <Animated.View style={[styles.notificationContent, { transform: [{ scale: notificationScale.scale }] }]}>
                                     <LinearGradient
-                                        colors={[colors.primary + '15', colors.primary + '05']}
+                                        colors={GRADIENT_COLORS.notification(colors.primary)}
                                         style={styles.notificationGradient}
                                     >
                                         <Ionicons name="notifications" size={22} color={colors.primary} />
@@ -129,7 +130,7 @@ const ProfileHeader: React.FC = () => {
                         >
                             <Animated.View style={[styles.actionCardContent, { transform: [{ scale: addContactsScale.scale }] }]}>
                                 <LinearGradient
-                                    colors={[colors.primary + '15', colors.primary + '05']}
+                                    colors={GRADIENT_COLORS.action(colors.primary)}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 1 }}
                                     style={styles.actionCardGradient}
@@ -158,7 +159,7 @@ const ProfileHeader: React.FC = () => {
                         >
                             <Animated.View style={[styles.actionCardContent, { transform: [{ scale: policeContactScale.scale }] }]}>
                                 <LinearGradient
-                                    colors={[colors.primary + '15', colors.primary + '05']}
+                                    colors={GRADIENT_COLORS.action(colors.primary)}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 1, y: 1 }}
                                     style={styles.actionCardGradient}
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 1000,
+        zIndex: 100,
     },
     safeArea: {
         width: '100%',
@@ -216,6 +217,17 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         flex: 0.4,
         marginRight: 12,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.05,
+                shadowRadius: 3,
+            },
+            android: {
+                elevation: 2,
+            },
+        }),
     },
     avatarContainer: {
         marginRight: 12,
@@ -276,17 +288,28 @@ const styles = StyleSheet.create({
     },
     notificationButton: {
         borderRadius: 14,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 4,
+            },
+            android: {
+                elevation: 3,
+            },
+        }),
     },
     notificationContent: {
         borderRadius: 14,
         overflow: 'hidden',
+        backgroundColor: '#fff',
     },
     notificationGradient: {
-        width: 44,
-        height: 44,
+        width: 48,
+        height: 48,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.02)',
     },
     actionCards: {
         paddingHorizontal: 16,
@@ -295,17 +318,41 @@ const styles = StyleSheet.create({
     actionCard: {
         borderRadius: 16,
         overflow: 'hidden',
+        marginBottom: 8,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.1,
+                shadowRadius: 6,
+            },
+            android: {
+                elevation: 4,
+            },
+        }),
     },
     actionCardContent: {
         width: '100%',
+        backgroundColor: '#fff',
     },
     actionCardGradient: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16,
+        padding: 18,
     },
     actionIconBox: {
         marginRight: 16,
+        ...Platform.select({
+            ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.06,
+                shadowRadius: 3,
+            },
+            android: {
+                elevation: 2,
+            },
+        }),
     },
     actionIconGradient: {
         width: 44,

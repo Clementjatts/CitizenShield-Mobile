@@ -103,11 +103,19 @@ export default function EmergencyContactsScreen() {
                 contentContainerStyle={styles.listContainer}
                 refreshing={loading}
                 onRefresh={fetchContacts}
+                ListEmptyComponent={() => (
+                    <View style={styles.emptyContainer}>
+                        <Ionicons name="people-outline" size={48} color={colors.text} style={styles.emptyIcon} />
+                        <Text style={[styles.emptyText, { color: colors.text }]}>No emergency contacts added yet</Text>
+                        <Text style={[styles.emptySubText, { color: colors.text }]}>Add contacts who should be notified in case of emergency</Text>
+                    </View>
+                )}
             />
             <TouchableOpacity
                 style={[styles.addButton, { backgroundColor: colors.primary }]}
                 onPress={() => router.push('/add-new-contact')}
             >
+                <Ionicons name="add" size={24} color="white" style={styles.addIcon} />
                 <Text style={styles.addButtonText}>Add New Contact</Text>
             </TouchableOpacity>
         </SafeAreaView>
@@ -125,40 +133,92 @@ const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 24,
+        paddingVertical: 8,
     },
     backButton: {
         marginRight: 16,
+        padding: 8,
+        borderRadius: 12,
+        backgroundColor: 'rgba(0,0,0,0.05)',
     },
     headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
+        fontSize: 24,
+        fontWeight: '700',
     },
     contactItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 16,
-        marginBottom: 12,
-        borderRadius: 8,
+        padding: 20,
+        marginBottom: 16,
+        borderRadius: 16,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+        borderWidth: Platform.OS === 'ios' ? 0 : 1,
+        borderColor: 'rgba(0,0,0,0.1)',
     },
     contactName: {
         fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 4,
+        fontWeight: '600',
+        marginBottom: 8,
+        letterSpacing: 0.3,
     },
     contactInfo: {
-        fontSize: 14,
+        fontSize: 15,
+        marginBottom: 4,
+        opacity: 0.8,
     },
     addButton: {
         margin: 16,
-        padding: 12,
-        borderRadius: 8,
+        padding: 16,
+        borderRadius: 16,
         alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
+        elevation: 5,
     },
     addButtonText: {
         color: 'white',
-        fontWeight: 'bold',
+        fontWeight: '600',
         fontSize: 16,
+        marginLeft: 8,
+    },
+    addIcon: {
+        marginRight: 4,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 40,
+    },
+    emptyIcon: {
+        marginBottom: 16,
+        opacity: 0.7,
+    },
+    emptyText: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 8,
+    },
+    emptySubText: {
+        fontSize: 14,
+        opacity: 0.7,
+        textAlign: 'center',
+        paddingHorizontal: 32,
     },
 });
