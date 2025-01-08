@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert,} from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Platform} from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';

@@ -90,7 +90,7 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
     disabled,
 }) => {
     const { colors } = useTheme();
-    const lastTapRef = useRef<{ time: number; id: EmergencyTypeId } | null>(null);
+    const lastTapRef = useRef<{ time: number; id: EmergencyTypeId; triggered: boolean } | null>(null);
     const DOUBLE_TAP_DELAY = 300; // milliseconds
 
     const handlePress = (typeId: EmergencyTypeId) => {
@@ -99,19 +99,25 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
         const now = Date.now();
         const lastTap = lastTapRef.current;
 
+        // Always trigger onSelect for every tap
+        onSelect(typeId);
+        
         if (
             lastTap &&
             lastTap.id === typeId &&
-            now - lastTap.time < DOUBLE_TAP_DELAY
+            now - lastTap.time < DOUBLE_TAP_DELAY &&
+            !lastTap.triggered
         ) {
             // Double tap detected
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             onEmergencyTrigger && onEmergencyTrigger(typeId);
-            lastTapRef.current = null;
+            lastTapRef.current = { time: now, id: typeId, triggered: true };
+        } else if (!lastTap || now - lastTap.time >= DOUBLE_TAP_DELAY || lastTap.id !== typeId) {
+            // First tap or new sequence
+            lastTapRef.current = { time: now, id: typeId, triggered: false };
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         } else {
-            // First tap
-            lastTapRef.current = { time: now, id: typeId };
-            onSelect(typeId);
+            // Additional taps within window after trigger
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }
     };
@@ -122,6 +128,7 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
                 {EMERGENCY_TYPES.map((type) => (
                     <TouchableOpacity
                         key={type.id}
+                        testID={`emergency-type-${type.id}`}
                         style={[
                             styles.item,
                             {
@@ -133,6 +140,10 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
                         ]}
                         onPress={() => handlePress(type.id)}
                         disabled={disabled}
+                        accessibilityRole="button"
+                        accessibilityState={disabled ? { disabled: true } : undefined}
+                        accessibilityLabel={`${type.title} emergency type`}
+                        accessibilityHint="Double tap to trigger emergency"
                     >
                         <View style={styles.itemContent}>
                             <Ionicons
@@ -155,6 +166,13 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity 
+                onPress={onClose}
+                testID="close-button"
+                style={styles.closeButton}
+            >
+                <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
             <View style={styles.instructionBox}>
                 <Text style={styles.instructionText}>
                     Tap once to select an emergency type.{"\n"}
@@ -176,6 +194,12 @@ const styles = StyleSheet.create({
         height: "50%",
         justifyContent: "center",
         alignItems: "center",
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 16,
+        right: 16,
+        padding: 8,
     },
     instructionBox: {
         backgroundColor: "white",
