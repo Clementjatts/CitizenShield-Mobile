@@ -9,28 +9,42 @@ CitizenShield-Mobile is a React Native mobile application designed to enhance co
 - **Incident Mapping**: Visualize incidents on a map for better situational awareness.
 - **Community Forums**: Engage with the community through forums to share information and updates.
 - **Real-time Notifications**: Receive instant alerts about emergencies in your area.
-- **User Authentication**: Secure login and registration system.
+- **User Authentication**: Secure login and registration system with Firebase.
 - **Profile Management**: Manage personal information and emergency contacts.
 - **Offline Support**: Basic functionality available without internet connection.
+- **Location Services**: Real-time location tracking and geofencing capabilities.
+- **Image Upload**: Support for image uploads in incident reports.
 
 **Project Structure**:
 ```
 frontend/
-├── app/                 # Main application screens and navigation
+├── app/                 # Main application screens and navigation using Expo Router
 ├── assets/             # Static assets (images, fonts)
 ├── components/         # Reusable UI components
-├── config/            # Configuration files
-├── constants/         # App constants and theme
-├── types/             # TypeScript type definitions
-└── utils/             # Utility functions
+├── config/             # Configuration files
+├── constants/          # App constants and theme
+├── context/            # React Context providers
+├── hooks/              # Custom React hooks
+├── types/              # TypeScript type definitions
+├── utils/              # Utility functions
+└── __tests__/          # Test files
 ```
 
 **Prerequisites**:
 - Node.js (v16 or higher)
 - npm (v8 or higher) or yarn (v1.22 or higher)
-- Expo CLI (`npm install -g expo-cli`)
+- Expo CLI
 - Xcode (for iOS development)
 - Android Studio (for Android development)
+
+**Tech Stack**:
+- React Native (v0.76.2)
+- Expo SDK 52
+- Firebase 10.14.1
+- TypeScript 5.3.3
+- React Navigation 7.0
+- React Native Maps 1.18.0
+- Expo Router 4.0.6
 
 **Installation**:
 1. Clone the repository:
@@ -47,10 +61,6 @@ frontend/
    # or
    yarn install
    ```
-4. Install iOS pods (if developing for iOS):
-   ```bash
-   cd ios && pod install && cd ..
-   ```
 
 **Development Workflow**:
 1. Start the development server:
@@ -64,25 +74,15 @@ frontend/
    - Press `a` for Android emulator
    - Scan QR code with Expo Go app for physical device
 
-**Running the Application**:
-- To start the application on a simulator or device:
-  ```bash
-  npm start
-  # or
-  yarn start
-  ```
-- For Android:
-  ```bash
-  npm run android
-  # or
-  yarn android
-  ```
-- For iOS:
-  ```bash
-  npm run ios
-  # or
-  yarn ios
-  ```
+**Available Scripts**:
+```bash
+npm start          # Start the Expo development server
+npm run android    # Run on Android
+npm run ios        # Run on iOS
+npm run web        # Run on web browser
+npm test          # Run tests
+npm run lint      # Run ESLint
+```
 
 **Configuration**:
 1. Firebase Setup:
@@ -97,49 +97,19 @@ frontend/
    };
    ```
 
-2. Google Maps Setup:
-   - Get a Google Maps API key from [Google Cloud Console](https://console.cloud.google.com)
-   - Update the API key in `app.json`:
-   ```json
-   {
-     "expo": {
-       "android": {
-         "config": {
-           "googleMaps": {
-             "apiKey": "your-google-maps-api-key"
-           }
-         }
-       },
-       "ios": {
-         "config": {
-           "googleMapsApiKey": "your-google-maps-api-key"
-         }
-       }
-     }
-   }
+2. Environment Variables:
+   Create a `.env` file in the root directory with the following variables:
+   ```
+   API_URL=your-api-url
+   FIREBASE_API_KEY=your-firebase-api-key
+   GOOGLE_MAPS_API_KEY=your-google-maps-api-key
    ```
 
-**Environment Variables**:
-- Create a `.env` file in the root directory:
-  ```
-  API_URL=your-api-url
-  GOOGLE_MAPS_API_KEY=your-google-maps-api-key
-  ```
-- Note: Never commit `.env` file to version control
-
 **Testing**:
-- Run unit tests:
-  ```bash
-  npm test
-  # or
-  yarn test
-  ```
-- Run e2e tests:
-  ```bash
-  npm run e2e
-  # or
-  yarn e2e
-  ```
+The project uses Jest and React Native Testing Library for testing:
+```bash
+npm test          # Run tests in watch mode
+```
 
 **Building for Production**:
 1. For Android:
@@ -188,3 +158,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Acknowledgments**:
 - Thanks to all contributors who have helped shape CitizenShield
 - Special thanks to the open-source community for the tools and libraries used in this project
+
+_Last updated: January 15, 2025_
