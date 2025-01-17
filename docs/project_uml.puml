@@ -1,0 +1,104 @@
+@startuml CitizenShield Mobile App
+
+' Style settings
+skinparam packageStyle rectangle
+skinparam componentStyle uml2
+skinparam backgroundColor white
+skinparam padding 8
+skinparam roundcorner 20
+skinparam linetype ortho
+
+' Colors and Styles
+skinparam package {
+    BackgroundColor<<Core>> LightSkyBlue
+    BackgroundColor<<UI>> LightGreen
+    BackgroundColor<<Data>> LightYellow
+    BackgroundColor<<External>> LightGray
+}
+
+' Main Application
+package "CitizenShield Mobile App" {
+    ' Core System Components
+    package "Core Systems" <<Core>> {
+        component [Authentication Module] as auth
+        component [Emergency Response System] as emergency
+        component [Location Services] as location
+        component [Notification System] as notifications
+    }
+
+    ' Feature Components
+    package "Business Features" <<Core>> {
+        component [Community Safety Network] as community
+        component [User Management] as user
+        
+        ' Core Features Subpackage
+        package "Emergency Features" {
+            component [SOS Alert System] as sosSystem
+            component [Police Database] as policeDB
+            component [Profile Management] as profile
+        }
+        
+        package "Community Features" {
+            component [Forum System] as forum
+            component [Event Management] as events
+        }
+    }
+
+    ' UI Layer
+    package "Presentation Layer" <<UI>> {
+        package "Context Providers" {
+            component [AuthContext] as authContext
+            component [ThemeContext] as themeContext
+        }
+
+        package "UI Components" {
+            component [Common Components] as commonUI
+            component [Emergency Components] as emergencyUI
+            component [Form Components] as formUI
+            component [Map Components] as mapUI
+        }
+    }
+
+    ' Data Layer
+    package "Data Layer" <<Data>> {
+        database "Firebase\nRealtime DB" as firebaseDB
+        database "Cloud Storage" as cloudStorage
+    }
+
+    ' External Services
+    package "External Services" <<External>> {
+        cloud "Emergency\nServices API" as emergencyAPI
+        cloud "Maps Service" as mapsAPI
+    }
+}
+
+' Relationships
+' Core Systems Relations
+auth --> authContext
+auth --> firebaseDB: authenticates
+emergency --> emergencyAPI: dispatches
+emergency --> location: tracks
+emergency --> notifications: alerts
+
+' Feature Relations
+sosSystem --> emergency: triggers
+sosSystem --> location: provides
+sosSystem --> notifications: sends
+community --> forum: manages
+community --> firebaseDB: stores
+policeDB --> firebaseDB: queries
+profile --> cloudStorage: stores
+profile --> user: manages
+
+' UI Relations
+emergencyUI --> emergency: displays
+mapUI --> location: renders
+formUI --> commonUI: uses
+commonUI --> themeContext: styles
+
+' Data Flow
+location --> mapsAPI: requests
+notifications --> firebaseDB: stores
+events --> community: organizes
+
+@enduml
