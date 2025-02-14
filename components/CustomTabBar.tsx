@@ -1,3 +1,9 @@
+/**
+ * CustomTabBar Component
+ * A custom bottom tab bar navigation component with animated indicators
+ * Supports icons, labels, and custom styling for active/inactive states
+ */
+
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, SafeAreaView, Animated, Text } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -9,36 +15,81 @@ import { useTabAnimation } from '../hooks/useTabAnimation';
 import { TAB_CONFIG, TabRouteName } from '../constants/TabBar';
 import { CommonStyles } from '../constants/Styles';
 
+/**
+ * Interface for badge data display
+ * @interface TabBadge
+ * @property {boolean} show - Whether to show the badge
+ * @property {number} [count] - Optional count to display in badge
+ */
 interface TabBadge {
     show: boolean;
     count?: number;
 }
 
+/**
+ * Props for the CustomTabBar component
+ * @interface CustomTabBarProps
+ * @property {TabRouteName[]} routes - Array of route names for the tabs
+ * @property {number} activeIndex - Index of the currently active tab
+ * @property {(index: number) => void} onTabPress - Callback when a tab is pressed
+ */
+interface CustomTabBarProps extends BottomTabBarProps {
+    // No additional props
+}
+
+/**
+ * Maps route names to their corresponding icon names
+ * @param {TabRouteName} route - Route name to get icon for
+ * @returns {TabIconName} Corresponding icon name
+ */
+const getIconName = (routeName: TabRouteName, isFocused: boolean) => {
+    const route = TAB_CONFIG.routes[routeName];
+    return route ? (isFocused ? route.icons.active : route.icons.inactive) : TAB_CONFIG.routes.home.icons.inactive;
+};
+
+/**
+ * Maps route names to their corresponding labels
+ * @param {TabRouteName} route - Route name to get label for
+ * @returns {string} Corresponding label
+ */
+const getLabelText = (routeName: TabRouteName) => {
+    const route = TAB_CONFIG.routes[routeName];
+    return route ? route.label : routeName;
+};
+
+/**
+ * Gets badge data for a given route
+ * @param {TabRouteName} route - Route name to get badge data for
+ * @param {number} unreadCount - Number of unread messages
+ * @returns {TabBadge} Badge data
+ */
+const getBadgeData = (routeName: TabRouteName, unreadCount: number): TabBadge => {
+    if (routeName === 'messages') {
+        return { 
+            show: unreadCount > 0,
+            count: unreadCount
+        };
+    }
+    return { show: false };
+};
+
+/**
+ * CustomTabBar Component
+ * Renders a custom bottom tab bar with animated selection indicator
+ * 
+ * @param {CustomTabBarProps} props - Component props
+ * @returns {React.ReactElement} Rendered component
+ */
 const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
     const { colors } = useTheme();
     const unreadCount = useUnreadMessages();
     const { getAnimatedStyles } = useTabAnimation(state.routes, state.index);
 
-    const getIconName = (routeName: TabRouteName, isFocused: boolean) => {
-        const route = TAB_CONFIG.routes[routeName];
-        return route ? (isFocused ? route.icons.active : route.icons.inactive) : TAB_CONFIG.routes.home.icons.inactive;
-    };
-
-    const getLabelText = (routeName: TabRouteName) => {
-        const route = TAB_CONFIG.routes[routeName];
-        return route ? route.label : routeName;
-    };
-
-    const getBadgeData = (routeName: TabRouteName): TabBadge => {
-        if (routeName === 'messages') {
-            return { 
-                show: unreadCount > 0,
-                count: unreadCount
-            };
-        }
-        return { show: false };
-    };
-
+    /**
+     * Handles tab press event
+     * @param {any} route - Route object
+     * @param {boolean} isFocused - Whether the tab is currently focused
+     */
     const handlePress = (route: any, isFocused: boolean) => {
         const event = navigation.emit({
             type: 'tabPress',
@@ -59,7 +110,7 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                     const { options } = descriptors[route.key];
                     const isFocused = state.index === index;
                     const iconName = getIconName(route.name as TabRouteName, isFocused);
-                    const badge = getBadgeData(route.name as TabRouteName);
+                    const badge = getBadgeData(route.name as TabRouteName, unreadCount);
                     const { scale, opacity } = getAnimatedStyles(index);
 
                     return (
@@ -149,6 +200,9 @@ const CustomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
     );
 };
 
+/**
+ * Component styles
+ */
 const styles = StyleSheet.create({
     container: {
         width: '100%',
@@ -156,61 +210,29 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        elevation: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
+        ...CommonStyles.shadow,
     },
     tabBar: {
-        ...CommonStyles.row,
-        height: 60,
-        paddingBottom: 0,
+        flexDirection: 'row',
+        paddingTop: 8,
+        paddingBottom: 24,
         borderTopWidth: 1,
-        backgroundColor: '#FFFFFF',
     },
     tabItem: {
         flex: 1,
-        height: 60,
-        ...CommonStyles.flexCenter,
+        alignItems: 'center',
     },
     iconContainer: {
-        ...CommonStyles.flexCenter,
+        alignItems: 'center',
+        justifyContent: 'center',
         position: 'relative',
-        width: '100%',
-        height: '100%',
+        height: 50,
     },
     iconWrapper: {
-        padding: 8,
-        borderRadius: 20,
-        backgroundColor: 'transparent',
+        position: 'relative',
     },
     icon: {
-        marginBottom: 2,
-    },
-    label: {
-        fontSize: 11,
-        marginTop: 2,
-        fontWeight: '500',
-    },
-    badge: {
-        position: 'absolute',
-        top: -2,
-        right: -6,
-        minWidth: 18,
-        height: 18,
-        borderRadius: 9,
-        ...CommonStyles.flexCenter,
-        borderWidth: 2,
-        borderColor: '#FFFFFF',
-    },
-    countBadge: {
-        paddingHorizontal: 4,
-    },
-    badgeText: {
-        color: '#FFFFFF',
-        fontSize: 10,
-        fontWeight: '600',
+        marginBottom: 4,
     },
     activeBackground: {
         position: 'absolute',
@@ -222,12 +244,42 @@ const styles = StyleSheet.create({
         width: 4,
         height: 4,
         borderRadius: 2,
-        marginTop: 4,
+        position: 'absolute',
+        bottom: 0,
+    },
+    badge: {
+        position: 'absolute',
+        top: -4,
+        right: -8,
+        minWidth: 16,
+        height: 16,
+        borderRadius: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    countBadge: {
+        minWidth: 18,
+        height: 18,
+        borderRadius: 9,
+    },
+    badgeText: {
+        color: '#FFFFFF',
+        fontSize: 10,
+        fontWeight: 'bold',
+        paddingHorizontal: 4,
+    },
+    label: {
+        fontSize: 12,
+        textAlign: 'center',
+        marginTop: 2,
     },
     blur: {
-        ...StyleSheet.absoluteFillObject,
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 30,
         borderTopWidth: 1,
-        zIndex: 1,
     },
 });
 

@@ -1,7 +1,27 @@
+/**
+ * CustomButton Component
+ * A reusable button component with customizable styles and variants
+ * Supports different button types (primary, secondary, outline) and states (loading, disabled)
+ */
+
 import React, { forwardRef } from 'react';
 import { TouchableOpacity, Text, ActivityIndicator, ViewStyle, TextStyle, View } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 
+/**
+ * Props for the CustomButton component
+ * @interface CustomButtonProps
+ * @property {string} title - Text to display on the button
+ * @property {() => void} onPress - Function to call when button is pressed
+ * @property {ViewStyle} [style] - Additional styles for the button container
+ * @property {TextStyle} [textStyle] - Additional styles for the button text
+ * @property {boolean} [loading] - Whether to show loading indicator
+ * @property {boolean} [disabled] - Whether the button is disabled
+ * @property {string} [variant='primary'] - Button style variant (primary/secondary/outline)
+ * @property {string} [size='medium'] - Button size (small/medium/large)
+ * @property {boolean} [fullWidth] - Whether the button should take up the full width of its parent
+ * @property {string} [color] - Custom color for the button
+ */
 interface CustomButtonProps {
     title: string;
     onPress: () => void;
@@ -15,6 +35,14 @@ interface CustomButtonProps {
     color?: string;
 }
 
+/**
+ * CustomButton Component
+ * A versatile button component that adapts to the current theme
+ * 
+ * @param {CustomButtonProps} props - Component props
+ * @param {React.Ref<View>} ref - Reference to the button element
+ * @returns {React.ReactElement} Rendered component
+ */
 const CustomButton = forwardRef<View, CustomButtonProps>(({
     title,
     onPress,
@@ -29,6 +57,9 @@ const CustomButton = forwardRef<View, CustomButtonProps>(({
 }, ref) => {
     const { colors } = useTheme();
 
+    /**
+     * Determines the button style based on variant and state
+     */
     const getButtonStyle = () => {
         const baseStyle: ViewStyle = {
             paddingVertical: 12,
@@ -79,6 +110,9 @@ const CustomButton = forwardRef<View, CustomButtonProps>(({
         }
     };
 
+    /**
+     * Determines the text style based on variant and state
+     */
     const getTextStyle = () => {
         const baseStyle: TextStyle = {
             fontSize: 16,

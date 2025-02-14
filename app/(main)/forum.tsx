@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, FlatList, SafeAreaView, StatusBar, View, Pressable, ActivityIndicator, Alert, RefreshControl } from 'react-native';
+import { StyleSheet, FlatList, SafeAreaView, StatusBar, View, TouchableOpacity, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { Text } from '../../components/Themed';
 import { useTheme } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -165,108 +165,181 @@ export default function ForumScreen() {
   }, []);
 
   const renderPost = ({ item }: { item: ForumPost }) => (
-    <Pressable
-      style={[styles.card, { backgroundColor: colors.card }]}
+    <TouchableOpacity
+      style={{
+        backgroundColor: colors.card,
+        borderRadius: 12,
+        marginBottom: 16,
+        overflow: 'hidden',
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        padding: 16,
+      }}
       onPress={() => router.push({
         pathname: '/post/[id]',
         params: { id: item.id }
       })}
     >
-      <View style={styles.cardContent}>
-        <Text style={[styles.cardTitle, { color: colors.text }]}>
-          {item.title}
-        </Text>
-        <Text style={[styles.cardMessage, { color: colors.text }]} numberOfLines={3}>
-          {item.content}
-        </Text>
-        <View style={styles.metadataContainer}>
-          <View style={styles.authorContainer}>
-            <Ionicons name="person-outline" size={14} color={colors.text} />
-            <Text style={[styles.metadataText, { color: colors.text }]}>
-              {item.author}
+      <Text style={{
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 8,
+        lineHeight: 24,
+        color: colors.text,
+      }}>
+        {item.title}
+      </Text>
+      <Text style={{
+        fontSize: 14,
+        lineHeight: 20,
+        marginBottom: 12,
+        color: colors.text,
+      }} numberOfLines={3}>
+        {item.content}
+      </Text>
+      <View style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}>
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+          <Ionicons name="person-outline" size={14} color={colors.text} />
+          <Text style={{
+            fontSize: 12,
+            marginLeft: 4,
+            color: colors.text,
+          }}>
+            {item.author}
+          </Text>
+        </View>
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+            <Ionicons name="chatbubble-outline" size={14} color={colors.text} />
+            <Text style={{
+              fontSize: 12,
+              marginLeft: 4,
+              color: colors.text,
+            }}>
+              {item.replies}
             </Text>
           </View>
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Ionicons name="chatbubble-outline" size={14} color={colors.text} />
-              <Text style={[styles.statText, { color: colors.text }]}>
-                {item.replies}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="heart" size={14} color={colors.text} />
-              <Text style={[styles.statText, { color: colors.text }]}>
-                {item.likes}
-              </Text>
-            </View>
+          <View style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginLeft: 12,
+          }}>
+            <Ionicons name="heart" size={14} color={colors.text} />
+            <Text style={{
+              fontSize: 12,
+              marginLeft: 4,
+              color: colors.text,
+            }}>
+              {item.likes}
+            </Text>
           </View>
         </View>
       </View>
-    </Pressable>
+    </TouchableOpacity>
   );
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      </SafeAreaView>
+      <View style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+      }}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-        <View style={styles.errorContainer}>
-          <Text style={[styles.errorText, { color: colors.text }]}>
-            {error}
+      <View style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.background,
+        padding: 20,
+      }}>
+        <Text style={{
+          fontSize: 16,
+          textAlign: 'center',
+          marginBottom: 20,
+          color: colors.text,
+        }}>
+          {error}
+        </Text>
+        <TouchableOpacity
+          style={{
+            padding: 10,
+            borderRadius: 8,
+            backgroundColor: colors.primary,
+          }}
+          onPress={fetchPosts}
+        >
+          <Text style={{
+            color: 'white',
+            fontSize: 16,
+            fontWeight: 'bold',
+          }}>
+            Retry
           </Text>
-          <Pressable
-            style={[styles.retryButton, { backgroundColor: colors.primary }]}
-            onPress={fetchPosts}
-          >
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </Pressable>
-        </View>
-      </SafeAreaView>
+        </TouchableOpacity>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-      <StatusBar barStyle="light-content" />
-      <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Forum</Text>
-      </View>
-      <FlatList
-        data={posts}
-        renderItem={renderPost}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
+    <View style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <StatusBar barStyle="light-content" />
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>Forum</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <FlatList
+            data={posts}
+            renderItem={renderPost}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={[styles.listContent, { paddingBottom: 100 }]}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={[colors.primary]}
+                tintColor={colors.primary}
+              />
+            }
           />
-        }
-      />
-      <Pressable
-        style={[styles.fab, { backgroundColor: colors.primary }]}
+        </View>
+      </SafeAreaView>
+      <TouchableOpacity
+        activeOpacity={0.8}
         onPress={() => router.push('/create-post')}
+        style={[styles.fab, { backgroundColor: colors.primary }]}
       >
-        <Ionicons name="add" size={24} color={colors.background} />
-      </Pressable>
-    </SafeAreaView>
+        <Ionicons name="add" size={32} color="#FFFFFF" />
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
   header: {
     padding: 16,
     borderBottomWidth: 1,
@@ -275,97 +348,26 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  retryButton: {
-    padding: 10,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   listContent: {
     padding: 16,
   },
-  card: {
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  cardContent: {
-    padding: 16,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    lineHeight: 24,
-  },
-  cardMessage: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  metadataContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  authorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  metadataText: {
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginLeft: 12,
-  },
-  statText: {
-    fontSize: 12,
-    marginLeft: 4,
-  },
   fab: {
     position: 'absolute',
-    right: 16,
-    bottom: 16,
     width: 56,
     height: 56,
+    bottom: 120,
+    right: 20,
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 4,
+    elevation: 8,
+    zIndex: 9999,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.30,
+    shadowRadius: 4.65,
   },
 });

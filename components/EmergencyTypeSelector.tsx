@@ -1,3 +1,9 @@
+/**
+ * EmergencyTypeSelector Component
+ * A modal component that allows users to select and trigger different types of emergency alerts
+ * Displays emergency options with icons and handles emergency triggering with confirmation
+ */
+
 import React, { useRef } from "react";
 import {
     View,
@@ -10,12 +16,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 
-interface EmergencyType {
-    id: EmergencyTypeId;
-    title: string;
-    icon: keyof typeof Ionicons.glyphMap;
-}
-
+/**
+ * Enum for different types of emergencies
+ * Used to identify and track selected emergency types
+ */
 type EmergencyTypeId =
     | "1"
     | "2"
@@ -34,6 +38,29 @@ type EmergencyTypeId =
     | "15"
     | "16";
 
+/**
+ * Interface defining the structure of an emergency type
+ * @interface EmergencyType
+ * @property {EmergencyTypeId} id - Unique identifier for the emergency type
+ * @property {string} title - Display name of the emergency type
+ * @property {string} icon - Icon name from Ionicons to represent the emergency
+ */
+interface EmergencyType {
+    id: EmergencyTypeId;
+    title: string;
+    icon: keyof typeof Ionicons.glyphMap;
+}
+
+/**
+ * Props for the EmergencyTypeSelector component
+ * @interface EmergencyTypeSelectorProps
+ * @property {boolean} visible - Controls the visibility of the modal
+ * @property {function} onClose - Callback when the modal is closed
+ * @property {EmergencyTypeId} selectedType - Currently selected emergency type
+ * @property {function} onSelect - Callback when an emergency type is selected
+ * @property {function} onEmergencyTrigger - Callback when emergency is triggered
+ * @property {boolean} disabled - Whether the selector is disabled
+ */
 interface EmergencyTypeSelectorProps {
     visible: boolean;
     onClose: () => void;
@@ -43,6 +70,9 @@ interface EmergencyTypeSelectorProps {
     disabled?: boolean;
 }
 
+/**
+ * Available emergency types with their configurations
+ */
 const EMERGENCY_TYPES: EmergencyType[] = [
     { id: "1", title: "Life Threat", icon: "warning-outline" },
     { id: "2", title: "Police Abuse", icon: "shield-outline" },
@@ -62,6 +92,9 @@ const EMERGENCY_TYPES: EmergencyType[] = [
     { id: "16", title: "Riot", icon: "people-outline" },
 ];
 
+/**
+ * Mapping of emergency types to their respective colors
+ */
 const emergencyTypeColors: Record<EmergencyTypeId, string> = {
     "1": "#FF3B30", // Life Threat - Red
     "2": "#5856D6", // Police Abuse - Purple
@@ -81,6 +114,13 @@ const emergencyTypeColors: Record<EmergencyTypeId, string> = {
     "16": "#8E44AD", // Riot - Deep Purple
 };
 
+/**
+ * EmergencyTypeSelector Component
+ * Displays a modal with different emergency options and handles emergency triggering
+ * 
+ * @param {EmergencyTypeSelectorProps} props - Component props
+ * @returns {React.ReactElement} Rendered component
+ */
 const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
     visible,
     onClose,
@@ -93,6 +133,12 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
     const lastTapRef = useRef<{ time: number; id: EmergencyTypeId; triggered: boolean } | null>(null);
     const DOUBLE_TAP_DELAY = 300; // milliseconds
 
+    /**
+     * Handles the press event for an emergency type
+     * Triggers the onSelect callback and handles double tap detection for emergency triggering
+     * 
+     * @param {EmergencyTypeId} typeId - ID of the pressed emergency type
+     */
     const handlePress = (typeId: EmergencyTypeId) => {
         if (disabled) return;
 
@@ -122,6 +168,11 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
         }
     };
 
+    /**
+     * Renders the grid of emergency types
+     * 
+     * @returns {React.ReactElement} Rendered grid
+     */
     const renderGridItems = () => {
         return (
             <View style={styles.grid}>
@@ -184,6 +235,9 @@ const EmergencyTypeSelector: React.FC<EmergencyTypeSelectorProps> = ({
     );
 };
 
+/**
+ * Component styles
+ */
 const styles = StyleSheet.create({
     container: {
         backgroundColor: "transparent",

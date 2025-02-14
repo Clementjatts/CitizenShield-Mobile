@@ -101,6 +101,7 @@ export default function MessagesScreen() {
     const { colors } = useTheme();
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [showNewMessage, setShowNewMessage] = useState(false);
     const isFocused = useIsFocused();
 
@@ -186,57 +187,45 @@ export default function MessagesScreen() {
     }
 
     return (
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-            <StatusBar barStyle="light-content" />
-            <View style={[styles.header, { borderBottomColor: colors.border }]}>
-                <Text style={[styles.headerTitle, { color: colors.text }]}>Messages</Text>
-            </View>
-            {messages.length > 0 ? (
-                <FlatList
-                    data={messages}
-                    renderItem={({ item }) => (
-                        <MessageCard
-                            message={item}
-                            onPress={() => handleConversationOpen(item.id)}
-                        />
-                    )}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={styles.listContent}
-                />
-            ) : (
-                <View style={styles.emptyStateContainer}>
-                    <Text style={[styles.emptyStateText, { color: colors.text }]}>
-                        No messages yet. Start a conversation!
-                    </Text>
+        <View style={{ flex: 1 }}>
+            <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+                <StatusBar barStyle="light-content" />
+                <View style={[styles.header, { borderBottomColor: colors.border }]}>
+                    <Text style={[styles.headerTitle, { color: colors.text }]}>Messages</Text>
                 </View>
-            )}
-
-            {!showNewMessage && (
-                <TouchableOpacity
-                    style={[styles.fab, { backgroundColor: colors.primary }]}
-                    onPress={() => setShowNewMessage(true)}
-                >
-                    <Ionicons name="create" size={24} color="white" />
-                </TouchableOpacity>
-            )}
-
+                <View style={{ flex: 1 }}>
+                    <FlatList
+                        data={messages}
+                        renderItem={({ item }) => (
+                            <MessageCard
+                                message={item}
+                                onPress={() => handleConversationOpen(item.id)}
+                            />
+                        )}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={[styles.listContent, { paddingBottom: 100 }]}
+                    />
+                </View>
+            </SafeAreaView>
+            <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setShowNewMessage(true)}
+                style={[styles.fab, { backgroundColor: colors.primary }]}
+            >
+                <Ionicons name="create" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
             {showNewMessage && (
                 <View style={styles.modalContainer}>
                     <NewMessage onClose={handleModalClose} />
                 </View>
             )}
-        </SafeAreaView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     header: {
         padding: 16,
@@ -248,6 +237,34 @@ const styles = StyleSheet.create({
     },
     listContent: {
         padding: 16,
+    },
+    fab: {
+        position: 'absolute',
+        width: 56,
+        height: 56,
+        bottom: 120,
+        right: 20,
+        borderRadius: 28,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 8,
+        zIndex: 9999,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.30,
+        shadowRadius: 4.65,
+    },
+    modalContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'white',
+        zIndex: 1000,
     },
     card: {
         flexDirection: 'row',
@@ -310,28 +327,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
     },
-    modalContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'white',
-        zIndex: 1000,
-    },
-    fab: {
-        position: 'absolute',
-        right: 16,
-        bottom: 16,
-        width: 56,
-        height: 56,
-        borderRadius: 28,
+    loadingContainer: {
+        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
     },
 });

@@ -1,9 +1,23 @@
+/**
+ * NotificationItem Component
+ * Displays a single notification with title, message, and timestamp
+ * Supports both general and emergency notifications with different styling
+ */
+
 import React, { useState, useMemo } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Modal, ScrollView, SafeAreaView, Platform } from 'react-native';
 import { useTheme } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { CommonStyles } from '../constants/Styles';
 
+/**
+ * Props for the NotificationItem component
+ * @interface NotificationItemProps
+ * @property {string} title - The title of the notification
+ * @property {string} message - The main content of the notification
+ * @property {string} timestamp - When the notification was created/received
+ * @property {boolean} isGeneral - Whether this is a general (true) or emergency (false) notification
+ */
 interface NotificationItemProps {
     title: string;
     message: string;
@@ -11,6 +25,14 @@ interface NotificationItemProps {
     isGeneral?: boolean;
 }
 
+/**
+ * NotificationItem Component
+ * Renders a notification card with expandable message content
+ * Different styling applied for general vs emergency notifications
+ * 
+ * @param {NotificationItemProps} props - Component props
+ * @returns {React.ReactElement} Rendered component
+ */
 const NotificationItem: React.FC<NotificationItemProps> = ({
     title,
     message,
@@ -18,9 +40,16 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     isGeneral = true,
 }) => {
     const { colors } = useTheme();
+    // State to track if the full message is visible
     const [showFullMessage, setShowFullMessage] = useState(false);
+    // Memoized formatted timestamp
     const formattedTimestamp = useMemo(() => new Date(timestamp).toLocaleString(), [timestamp]);
 
+    /**
+     * Toggles the visibility of the full message
+     * When true, shows the entire message
+     * When false, truncates the message with ellipsis
+     */
     const toggleFullMessage = () => {
         setShowFullMessage(!showFullMessage);
     };
@@ -114,6 +143,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     );
 };
 
+/**
+ * Component styles
+ */
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',

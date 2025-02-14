@@ -148,6 +148,7 @@ const HomeScreen = () => {
   const animatedButtonScale = useRef(new Animated.Value(1)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedEmergencyType, setSelectedEmergencyType] = useState<EmergencyTypeId | null>(null);
 
   // New state variables for location tracking
   const [isTracking, setIsTracking] = useState(false);
@@ -315,44 +316,49 @@ const HomeScreen = () => {
   };
 
   const handleEmergencyTrigger = async (typeId: EmergencyTypeId) => {
+    if (!currentLocation) {
+      Alert.alert("Error", "Unable to get your current location. Please ensure location services are enabled.");
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
-      // Get current location
-      const location = await getCurrentLocation();
-      if (!location) {
-        Alert.alert(
-          "Error",
-          "Unable to get your location. Please enable location services and try again."
-        );
-        setIsLoading(false);
-        return;
-      }
-
-      // Send SMS to emergency contacts
-      await sendEmergencySMS(typeId, location);
-
-      // Save emergency to database
-      await saveEmergencyAlert({
+      // Create emergency data
+      const emergencyData: EmergencyData = {
         type: typeId,
-        location: location,
+        location: currentLocation,
         timestamp: new Date().toISOString(),
         userId: auth.currentUser?.uid || "",
-        status: "active",
-      });
+        status: "active"
+      };
+
+      // Start location tracking
+      setIsTracking(true);
+      setTrackingStartTime(Date.now());
+
+      // Store emergency in Firestore
+      const emergencyRef = await addDoc(collection(db, "emergencies"), emergencyData);
+      currentEmergencyId.current = emergencyRef.id;
+
+      // Send emergency SMS
+      const emergencyTypeText = getEmergencyTypeText(typeId);
+      await sendEmergencySMS(emergencyTypeText, currentLocation);
 
       // Show success message
       Alert.alert(
         "Emergency Alert Sent",
-        "Your emergency contacts have been notified of your situation.",
-        [{ text: "OK" }]
+        "Your emergency contacts have been notified and authorities have been alerted. Stay safe."
       );
     } catch (error) {
-      console.error("Error sending emergency alert:", error);
+      console.error("Error triggering emergency:", error);
       Alert.alert("Error", "Failed to send emergency alert. Please try again.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleEmergencyTypeSelect = (typeId: EmergencyTypeId) => {
+    setSelectedEmergencyType(typeId);
   };
 
   const getCurrentLocation = async () => {
@@ -418,11 +424,6 @@ const HomeScreen = () => {
     }
   };
 
-  // Function to handle selecting an emergency type
-  const handleEmergencyTypeSelect = (typeId: EmergencyTypeId) => {
-    // setSelectedEmergencyType(typeId);
-  };
-
   // Function to animate the button when pressed
   const animateButton = (pressed: boolean) => {
     Animated.spring(animatedButtonScale, {
@@ -475,6 +476,7 @@ const HomeScreen = () => {
           visible={showEmergencyTypes}
           onClose={() => setShowEmergencyTypes(false)}
           onSelect={handleEmergencyTypeSelect}
+          onEmergencyTrigger={handleEmergencyTrigger}
           disabled={isLoading}
         />
       </View>

@@ -1,3 +1,9 @@
+/**
+ * BlogArticlePreview Component
+ * Displays a preview card for a blog article with image, title, and snippet
+ * Links to the full article when pressed
+ */
+
 import React from 'react';
 import { StyleSheet, Pressable, View, Image } from 'react-native';
 import { Text } from './Themed';
@@ -7,10 +13,26 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@react-navigation/native';
 import { CommonStyles } from '../constants/Styles';
 
+/**
+ * Props for the BlogArticlePreview component
+ * @interface BlogArticlePreviewProps
+ * @property {Article} article - The article data to display in the preview
+ */
 interface BlogArticlePreviewProps {
     article: Article;
 }
 
+/**
+ * BlogArticlePreview Component
+ * Renders a preview card for a blog article with:
+ * - Featured image or placeholder icon
+ * - Title (truncated to 2 lines)
+ * - Content snippet (truncated to 2 lines)
+ * - Metadata (author, date, etc.)
+ * 
+ * @param {BlogArticlePreviewProps} props - Component props
+ * @returns {React.ReactElement} Rendered component
+ */
 export default function BlogArticlePreview({ article }: BlogArticlePreviewProps) {
     const { colors } = useTheme();
 
@@ -18,6 +40,7 @@ export default function BlogArticlePreview({ article }: BlogArticlePreviewProps)
         <Link href={`/article/${article.id}`} asChild>
             <Pressable>
                 <View style={[styles.container, { backgroundColor: colors.card }]}>
+                    {/* Article image or placeholder */}
                     {article.imageUrl ? (
                         <Image
                             source={{ uri: article.imageUrl }}
@@ -28,6 +51,8 @@ export default function BlogArticlePreview({ article }: BlogArticlePreviewProps)
                             <Ionicons name="newspaper-outline" size={32} color={colors.text} />
                         </View>
                     )}
+                    
+                    {/* Article content preview */}
                     <View style={styles.contentContainer}>
                         <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
                             {article.title}
@@ -35,6 +60,8 @@ export default function BlogArticlePreview({ article }: BlogArticlePreviewProps)
                         <Text style={[styles.snippet, { color: colors.text }]} numberOfLines={2}>
                             {article.snippet}
                         </Text>
+                        
+                        {/* Article metadata */}
                         <View style={styles.footer}>
                             <View style={styles.authorContainer}>
                                 <Ionicons name="person-outline" size={14} color={colors.text} />
@@ -56,6 +83,9 @@ export default function BlogArticlePreview({ article }: BlogArticlePreviewProps)
     );
 }
 
+/**
+ * Component styles
+ */
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
