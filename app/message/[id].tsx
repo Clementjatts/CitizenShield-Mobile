@@ -8,6 +8,10 @@ import { auth, db } from '../../config/firebaseConfig';
 import { collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, DocumentData, doc, updateDoc } from 'firebase/firestore';
 import { handleFirebaseError } from '../../utils/errorHandler';
 
+/**
+ * Interface defining the structure of a chat message
+ * Contains message content and metadata for display
+ */
 interface ChatMessage {
     id: string;
     sender: string;
@@ -15,6 +19,11 @@ interface ChatMessage {
     timestamp: Date;
 }
 
+/**
+ * Component for rendering individual message bubbles
+ * Displays message content with different styles for sent vs received messages
+ * Includes timestamp and handles message alignment
+ */
 const MessageBubble = ({ message, isCurrentUser }: { message: ChatMessage; isCurrentUser: boolean }) => {
     const { colors } = useTheme();
 
@@ -50,6 +59,11 @@ const MessageBubble = ({ message, isCurrentUser }: { message: ChatMessage; isCur
     );
 };
 
+/**
+ * Message detail screen component
+ * Provides real-time chat functionality with message history
+ * Includes message input, send functionality, and keyboard handling
+ */
 export default function MessageDetailScreen() {
     const { id } = useLocalSearchParams();
     const { colors } = useTheme();
@@ -58,6 +72,11 @@ export default function MessageDetailScreen() {
     const [loading, setLoading] = useState(true);
     const flatListRef = useRef<FlatList | null>(null);
 
+    /**
+     * Sets up real-time listener for chat messages when component mounts
+     * Handles authentication state and message sorting
+     * Cleans up listener on unmount
+     */
     useEffect(() => {
         if (!auth.currentUser) {
             router.replace('/login');
@@ -89,6 +108,11 @@ export default function MessageDetailScreen() {
         return () => unsubscribe();
     }, [id]);
 
+    /**
+     * Handles sending new messages
+     * Updates both messages collection and chat metadata
+     * Includes error handling and UI feedback
+     */
     const handleSendMessage = async () => {
         if (newMessage.trim() && auth.currentUser) {
             const chatId = Array.isArray(id) ? id[0] : id;

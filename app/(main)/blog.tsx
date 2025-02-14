@@ -8,6 +8,10 @@ import { db } from '../../config/firebaseConfig';
 import { collection, query, orderBy, where, getDocs, DocumentData } from 'firebase/firestore';
 import { handleFirebaseError } from '../../utils/errorHandler';
 
+/**
+ * Interface defining the structure of a blog post
+ * Contains all necessary fields for displaying blog content
+ */
 interface BlogPost {
     id: string;
     title: string;
@@ -19,6 +23,10 @@ interface BlogPost {
     published: boolean;
 }
 
+/**
+ * Main blog screen component that displays a list of published blog posts
+ * Handles loading states, error states, and pull-to-refresh functionality
+ */
 export default function BlogScreen() {
     const { colors } = useTheme();
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
@@ -26,6 +34,11 @@ export default function BlogScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    /**
+     * Fetches published blog posts from Firestore
+     * Orders posts by date in descending order and filters for published posts only
+     * Transforms Firestore data into BlogPost format
+     */
     const fetchBlogPosts = async () => {
         try {
             const blogPostsRef = collection(db, 'blogPosts');
@@ -64,11 +77,20 @@ export default function BlogScreen() {
         fetchBlogPosts();
     }, []);
 
+    /**
+     * Handles pull-to-refresh functionality
+     * Triggers a fresh fetch of blog posts when user pulls down to refresh
+     */
     const onRefresh = React.useCallback(() => {
         setRefreshing(true);
         fetchBlogPosts();
     }, []);
 
+    /**
+     * Renders an individual blog post card
+     * Displays post image (or placeholder), title, snippet, author, and date
+     * Handles navigation to full article view when pressed
+     */
     const renderBlogPost = ({ item }: { item: BlogPost }) => (
         <Pressable
             style={[styles.card, { backgroundColor: colors.card }]}

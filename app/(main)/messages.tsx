@@ -11,6 +11,10 @@ import NewMessage from '../../components/NewMessage';
 import { useIsFocused } from '@react-navigation/native';
 import { markMessagesAsRead } from '../../utils/messageUtils';
 
+/**
+ * Interface for a message in the chat list
+ * Contains essential information for displaying message previews
+ */
 interface Message {
     id: string;
     sender: string;
@@ -20,11 +24,19 @@ interface Message {
     avatar: string | null;
 }
 
+/**
+ * Interface for user profile data
+ * Used to display sender information in messages
+ */
 interface UserData {
     fullName: string;
     profileImageUrl: string | null;
 }
 
+/**
+ * Interface for chat data stored in Firestore
+ * Contains chat metadata and participant information
+ */
 interface ChatData {
     lastMessage: string;
     lastMessageTimestamp: Timestamp;
@@ -32,10 +44,19 @@ interface ChatData {
     participants: string[];
 }
 
+/**
+ * Component for rendering individual message cards in the chat list
+ * Displays sender info, message preview, timestamp, and unread status
+ */
 const MessageCard = ({ message, onPress }: { message: Message; onPress: () => void }) => {
     const { colors } = useTheme();
     const [imageError, setImageError] = useState(false);
 
+    /**
+     * Formats timestamp into human-readable format
+     * Shows time for today's messages, relative time for recent messages,
+     * and date for older messages
+     */
     const formatTime = (timestamp: Timestamp) => {
         const date = timestamp.toDate();
         const now = new Date();
@@ -97,6 +118,11 @@ const MessageCard = ({ message, onPress }: { message: Message; onPress: () => vo
     );
 };
 
+/**
+ * Main messages screen component
+ * Displays a list of user's conversations with real-time updates
+ * Handles message read status and navigation to individual chats
+ */
 export default function MessagesScreen() {
     const { colors } = useTheme();
     const [messages, setMessages] = useState<Message[]>([]);
@@ -105,6 +131,9 @@ export default function MessagesScreen() {
     const [showNewMessage, setShowNewMessage] = useState(false);
     const isFocused = useIsFocused();
 
+    /**
+     * Closes the new message modal
+     */
     const handleModalClose = () => {
         setShowNewMessage(false);
     };
@@ -170,6 +199,10 @@ export default function MessagesScreen() {
         return () => unsubscribe();
     }, []);
 
+    /**
+     * Handles opening a conversation
+     * Marks messages as read and navigates to the chat screen
+     */
     const handleConversationOpen = async (conversationId: string) => {
         // Mark messages from this specific conversation as read
         await markMessagesAsRead(conversationId);

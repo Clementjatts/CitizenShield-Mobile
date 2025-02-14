@@ -32,11 +32,19 @@ import {
 import { handleFirebaseError } from "../../utils/errorHandler";
 import { LinearGradient } from "expo-linear-gradient";
 
+/**
+ * Interface for location coordinates
+ * Used for tracking and displaying user's position on the map
+ */
 interface LocationCoords {
   latitude: number;
   longitude: number;
 }
 
+/**
+ * Interface for emergency incident data
+ * Contains all necessary information about an emergency event
+ */
 interface EmergencyData {
   type: string;
   location: LocationCoords;
@@ -45,6 +53,10 @@ interface EmergencyData {
   status: string;
 }
 
+/**
+ * Type definition for emergency categories
+ * Maps numeric IDs to different types of emergencies
+ */
 type EmergencyTypeId =
   | "1"
   | "2"
@@ -63,11 +75,20 @@ type EmergencyTypeId =
   | "15"
   | "16";
 
+/**
+ * Constants for location tracking
+ * TRACKING_DURATION: Total duration to track location (2 hours)
+ * UPDATE_INTERVAL: Frequency of location updates (15 minutes)
+ */
 const TRACKING_DURATION = 2 * 60 * 60 * 1000;
 const UPDATE_INTERVAL = 15 * 60 * 1000;
 
 Dimensions.get("window");
 
+/**
+ * Maps emergency type IDs to their human-readable descriptions
+ * Returns the emergency type text or 'Unknown Emergency' if type not found
+ */
 const getEmergencyTypeText = (typeId: string): string => {
   const emergencyTypes = {
     "1": "Life Threat",
@@ -92,6 +113,11 @@ const getEmergencyTypeText = (typeId: string): string => {
   );
 };
 
+/**
+ * Sends emergency SMS to user's emergency contacts
+ * Includes emergency type and location in the message
+ * @throws Error if user not logged in or no contacts found
+ */
 const sendEmergencySMS = async (
   emergencyType: string,
   location: LocationCoords
@@ -136,6 +162,11 @@ const sendEmergencySMS = async (
   }
 };
 
+/**
+ * Main home screen component
+ * Handles emergency reporting, location tracking, and map display
+ * Includes real-time location updates and emergency type selection
+ */
 const HomeScreen = () => {
   const { colors } = useTheme();
   const router = useRouter();

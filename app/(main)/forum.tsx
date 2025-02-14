@@ -8,6 +8,10 @@ import { db, auth } from '../../config/firebaseConfig';
 import { collection, query, orderBy, limit, getDocs, getDoc, doc, onSnapshot } from 'firebase/firestore';
 import { handleFirebaseError } from '../../utils/errorHandler';
 
+/**
+ * Interface defining the structure of a forum post
+ * Contains all necessary fields for displaying post content and engagement metrics
+ */
 interface ForumPost {
   id: string;
   title: string;
@@ -20,6 +24,10 @@ interface ForumPost {
   likedBy: string[];
 }
 
+/**
+ * Main forum screen component that displays a list of forum posts
+ * Handles real-time updates, authentication checks, and pull-to-refresh functionality
+ */
 export default function ForumScreen() {
   const { colors } = useTheme();
   const [posts, setPosts] = useState<ForumPost[]>([]);
@@ -27,6 +35,11 @@ export default function ForumScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Fetches forum posts from Firestore with author details and comment counts
+   * Requires authentication and handles error states
+   * Limits to 20 most recent posts ordered by creation date
+   */
   const fetchPosts = async () => {
     if (!auth.currentUser) {
       Alert.alert('Error', 'You must be logged in to view the forum.');
@@ -91,6 +104,11 @@ export default function ForumScreen() {
     }
   };
 
+  /**
+   * Sets up real-time subscription to forum posts
+   * Listens for changes in posts collection and updates UI accordingly
+   * Handles authentication state and cleanup on unmount
+   */
   useEffect(() => {
     let isSubscribed = true;
     let unsubscribeSnapshot: (() => void) | undefined;
@@ -159,11 +177,19 @@ export default function ForumScreen() {
     };
   }, []);
 
+  /**
+   * Handles pull-to-refresh functionality
+   * Triggers a fresh fetch of forum posts when user pulls down to refresh
+   */
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     fetchPosts();
   }, []);
 
+  /**
+   * Renders an individual forum post card
+   * Displays post title, content preview, and handles navigation to full post view
+   */
   const renderPost = ({ item }: { item: ForumPost }) => (
     <TouchableOpacity
       style={{

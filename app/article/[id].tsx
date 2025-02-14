@@ -8,6 +8,10 @@ import { db } from '../../config/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { handleFirebaseError } from '../../utils/errorHandler';
 
+/**
+ * Interface defining the structure of an article
+ * Contains all necessary fields for displaying full article content
+ */
 interface Article {
     id: string;
     title: string;
@@ -17,6 +21,11 @@ interface Article {
     imageUrl?: string;
 }
 
+/**
+ * Article detail screen component
+ * Displays the full content of a blog article including image, title, author, date, and content
+ * Handles loading states and error cases
+ */
 export default function ArticleScreen() {
     const { id } = useLocalSearchParams();
     const { colors } = useTheme();
@@ -24,6 +33,11 @@ export default function ArticleScreen() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    /**
+     * Fetches article data from Firestore when component mounts
+     * Transforms Firestore timestamp to readable date format
+     * Handles error cases and loading states
+     */
     useEffect(() => {
         const fetchArticle = async () => {
             try {

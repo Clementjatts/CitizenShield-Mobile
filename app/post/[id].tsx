@@ -9,6 +9,10 @@ import { doc, getDoc, collection, addDoc, onSnapshot, query, orderBy, Timestamp,
 import { writeBatch, increment, serverTimestamp } from 'firebase/firestore';
 import { handleFirebaseError } from '../../utils/errorHandler';
 
+/**
+ * Interface defining the structure of a comment
+ * Includes user information and admin status for moderation
+ */
 interface Comment {
     id: string;
     author: string;
@@ -18,6 +22,10 @@ interface Comment {
     isAdminComment?: boolean;
 }
 
+/**
+ * Interface defining the structure of a forum post
+ * Contains post content, metadata, and engagement metrics
+ */
 interface Post {
     id: string;
     title: string;
@@ -33,6 +41,11 @@ interface Post {
     comments: Comment[];
 }
 
+/**
+ * Post detail screen component
+ * Displays full post content with real-time comments and likes
+ * Includes admin functionality and user interactions
+ */
 export default function PostDetailScreen() {
     const { id } = useLocalSearchParams();
     const { colors } = useTheme();
@@ -45,6 +58,10 @@ export default function PostDetailScreen() {
     const [isLiked, setIsLiked] = useState(false);
     const flatListRef = useRef<FlatList | null>(null);
 
+    /**
+     * Fetches current user's data on component mount
+     * Sets user name and admin status for permissions
+     */
     useEffect(() => {
         const fetchUserData = async () => {
             if (auth.currentUser) {
@@ -64,6 +81,10 @@ export default function PostDetailScreen() {
         fetchUserData();
     }, []);
 
+    /**
+     * Sets up real-time listeners for post and comments
+     * Handles authentication and cleanup on unmount
+     */
     useEffect(() => {
         let unsubscribePost: (() => void) | undefined;
         let unsubscribeComments: (() => void) | undefined;
@@ -89,6 +110,11 @@ export default function PostDetailScreen() {
         };
     }, [id]);
 
+    /**
+     * Subscribes to post and comment updates
+     * Fetches author information and handles admin status
+     * Returns cleanup functions for both subscriptions
+     */
     const subscribeToPost = () => {
         if (!id || !auth.currentUser) return;
 
